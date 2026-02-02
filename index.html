@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Node Trace 测试页面</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .result-area {
+      background-color: white;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      padding: 20px;
+    }
+    .result-area p {
+      margin: 5px 0;
+      padding: 5px;
+      border-radius: 4px;
+    }
+    .result-area p:nth-child(odd) {
+      background-color: #f8f9fa;
+    }
+    .init-section {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .init-section h2 {
+      color: white;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+    }
+    .init-button {
+      background-color: white;
+      color: #667eea;
+      font-weight: 600;
+      padding: 12px 40px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+    .init-button:hover {
+      background-color: #f0f0f0;
+      color: #764ba2;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .init-button:active {
+      background-color: #e0e0e0;
+      transform: translateY(0);
+    }
+    .init-button:disabled {
+      background-color: #cccccc;
+      color: #666666;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    .init-status {
+      margin-top: 15px;
+      padding: 12px 20px;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: white;
+      text-align: center;
+      font-weight: 500;
+      font-size: 15px;
+    }
+    .init-status.success {
+      background-color: rgba(76, 175, 80, 0.3);
+    }
+    .init-status.error {
+      background-color: rgba(244, 67, 54, 0.3);
+    }
+    .test-section {
+      background-color: white;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .test-section:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    .test-section h2 {
+      color: #4CAF50;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #4CAF50;
+      font-weight: 600;
+    }
+    .test-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .api-section {
+      background-color: #fafafa;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+      border: 1px solid #e0e0e0;
+    }
+    .api-item {
+      background-color: white;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      border: 1px solid #e0e0e0;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .api-item:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .api-item h4 {
+      color: #2196F3;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+    .api-item p {
+      margin: 0;
+      color: #666;
+      font-size: 14px;
+    }
+    .description {
+      background-color: #e8f5e8;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+      border-left: 4px solid #4CAF50;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .description h3 {
+      color: #2e7d32;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+    .description li {
+      margin: 8px 0;
+      font-size: 14px;
+    }
+    .offcanvas-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .offcanvas-body {
+      background-color: #f8f9fa;
+      padding: 0;
+    }
+    .result-sidebar {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .result-sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .result-sidebar-content p {
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 6px;
+      border-left: 3px solid #667eea;
+      background-color: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .result-sidebar-content p:nth-child(odd) {
+      border-left-color: #764ba2;
+    }
+    .result-sidebar-content .success {
+      border-left-color: #28a745;
+      background-color: #d4edda;
+    }
+    .result-sidebar-content .error {
+      border-left-color: #dc3545;
+      background-color: #f8d7da;
+    }
+    .result-sidebar-content .info {
+      border-left-color: #17a2b8;
+      background-color: #d1ecf1;
+    }
+    .result-sidebar-footer {
+      padding: 15px;
+      background-color: white;
+      border-top: 1px solid #dee2e6;
+    }
+    .sidebar-toggle-btn {
+      position: fixed;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 1000;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 12px 20px;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      transition: all 0.3s ease;
+    }
+    .sidebar-toggle-btn:hover {
+      transform: translateY(-50%) scale(1.05);
+      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.6);
+    }
+    .sidebar-toggle-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <button id="sidebarToggleBtn" class="sidebar-toggle-btn" onclick="toggleSidebar()" disabled>
+    <i class="fas fa-terminal me-2"></i>测试结果
+  </button>
+
+  <div class="offcanvas offcanvas-end" tabindex="-1" id="resultSidebar" aria-labelledby="resultSidebarLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="resultSidebarLabel">
+        <i class="fas fa-file-alt me-2"></i>测试结果
+      </h5>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div class="result-sidebar">
+        <div id="result" class="result-sidebar-content">
+          <p class="info"><i class="fas fa-info-circle me-2"></i>初始化成功后，测试结果将显示在这里</p>
+        </div>
+        <div class="result-sidebar-footer">
+          <div class="d-flex gap-2">
+            <button class="btn btn-outline-danger flex-grow-1" onclick="clearResults()">
+              <i class="fas fa-trash me-2"></i>清除结果
+            </button>
+            <button class="btn btn-outline-primary flex-grow-1" onclick="copyResults()">
+              <i class="fas fa-copy me-2"></i>复制结果
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container py-4">
+    <div class="text-center mb-5">
+      <h1 class="display-4 fw-bold text-primary">Node Trace 测试页面</h1>
+      <p class="lead text-muted">高性能跨端事件追踪与 RUM SDK</p>
+    </div>
+    
+    <div class="description">
+      <h3><i class="fas fa-info-circle me-2"></i>测试功能说明</h3>
+      <ul class="list-unstyled">
+        <li><i class="fas fa-check text-success me-2"></i><strong>基本功能测试</strong>：测试初始化、事件发送、存储信息查看和清除功能</li>
+        <li><i class="fas fa-check text-success me-2"></i><strong>设备 ID 测试</strong>：测试设备 ID 获取功能，确保同一设备生成相同的 ID</li>
+        <li><i class="fas fa-check text-success me-2"></i><strong>浏览器数据测试</strong>：测试浏览器数据获取功能，收集设备和浏览器相关信息</li>
+        <li><i class="fas fa-check text-success me-2"></i><strong>用户 ID 测试</strong>：测试用户 ID 的设置、获取和清除功能</li>
+        <li><i class="fas fa-check text-success me-2"></i><strong>网络请求测试</strong>：测试网络请求监控功能</li>
+        <li><i class="fas fa-check text-success me-2"></i><strong>性能测试</strong>：测试性能监控功能</li>
+        <li><i class="fas fa-check text-success me-2"></i><strong>错误监控测试</strong>：测试错误捕获功能</li>
+        <li><i class="fas fa-check text-success me-2"></i><strong>离线功能测试</strong>：测试离线缓存和恢复功能</li>
+        <li><i class="fas fa-check text-success me-2"></i><strong>会话管理测试</strong>：测试会话 ID 生成、上下文收集和会话结束功能</li>
+        <li><i class="fas fa-check text-success me-2"></i><strong>行为追踪测试</strong>：测试用户行为路径记录和分析功能</li>
+        <li><i class="fas fa-check text-success me-2"></i><strong>插件管理测试</strong>：测试插件系统和自定义插件功能</li>
+      </ul>
+    </div>
+    
+    <div class="init-section">
+      <h2><i class="fas fa-rocket me-2"></i>初始化</h2>
+      <div class="text-center">
+        <button id="initButton" class="init-button" onclick="testInit()">
+          <i class="fas fa-cog me-2"></i>初始化追踪
+        </button>
+      </div>
+      <div id="initStatus" class="init-status">请先初始化追踪系统</div>
+    </div>
+    
+    <div class="test-section">
+      <h2><i class="fas fa-play-circle me-2"></i>基本功能测试</h2>
+      <div class="row g-3">
+        <div class="col-md-3 col-sm-6">
+          <button class="btn btn-success w-100 test-button" onclick="testTrack()" disabled>
+            <i class="fas fa-paper-plane me-2"></i>发送测试事件
+          </button>
+        </div>
+        <div class="col-md-3 col-sm-6">
+          <button class="btn btn-primary w-100 test-button" onclick="testFlush()" disabled>
+            <i class="fas fa-sync me-2"></i>手动触发发送
+          </button>
+        </div>
+        <div class="col-md-3 col-sm-6">
+          <button class="btn btn-info w-100 test-button" onclick="checkStorage()" disabled>
+            <i class="fas fa-database me-2"></i>查看存储信息
+          </button>
+        </div>
+        <div class="col-md-3 col-sm-6">
+          <button class="btn btn-danger w-100 test-button" onclick="clearStorage()" disabled>
+            <i class="fas fa-trash me-2"></i>清除本地存储
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2><i class="fas fa-mobile-alt me-2"></i>设备与用户 ID 测试</h2>
+      <div class="row g-3">
+        <div class="col-md-4 col-sm-6">
+          <button class="btn btn-outline-primary w-100 test-button" onclick="testDeviceId()" disabled>
+            <i class="fas fa-id-card me-2"></i>获取设备 ID
+          </button>
+        </div>
+        <div class="col-md-4 col-sm-6">
+          <button class="btn btn-outline-primary w-100 test-button" onclick="testTrackWithDeviceId()" disabled>
+            <i class="fas fa-id-card-alt me-2"></i>发送带设备 ID 的事件
+          </button>
+        </div>
+        <div class="col-md-4 col-sm-6">
+          <button class="btn btn-outline-primary w-100 test-button" onclick="testSetID()" disabled>
+            <i class="fas fa-user-plus me-2"></i>设置用户 ID
+          </button>
+        </div>
+        <div class="col-md-4 col-sm-6">
+          <button class="btn btn-outline-primary w-100 test-button" onclick="testGetID()" disabled>
+            <i class="fas fa-user-check me-2"></i>获取用户 ID
+          </button>
+        </div>
+        <div class="col-md-4 col-sm-6">
+          <button class="btn btn-outline-primary w-100 test-button" onclick="testGenerateStableDeviceId()" disabled>
+            <i class="fas fa-fingerprint me-2"></i>异步生成设备 ID
+          </button>
+        </div>
+        <div class="col-md-4 col-sm-6">
+          <button class="btn btn-outline-danger w-100 test-button" onclick="testClearID()" disabled>
+            <i class="fas fa-user-slash me-2"></i>清除用户 ID
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2><i class="fas fa-globe me-2"></i>浏览器数据测试</h2>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <button class="btn btn-outline-info w-100 test-button" onclick="testGetBrowserData()" disabled>
+            <i class="fas fa-info-circle me-2"></i>获取浏览器数据
+          </button>
+        </div>
+        <div class="col-md-6">
+          <button class="btn btn-outline-info w-100 test-button" onclick="testTrackWithBrowserData()" disabled>
+            <i class="fas fa-chart-line me-2"></i>发送带浏览器数据的事件
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2><i class="fas fa-network-wired me-2"></i>网络与性能测试</h2>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <button class="btn btn-outline-warning w-100 test-button" onclick="testNetworkRequest()" disabled>
+            <i class="fas fa-wifi me-2"></i>测试网络请求
+          </button>
+        </div>
+        <div class="col-md-6">
+          <button class="btn btn-outline-warning w-100 test-button" onclick="testPerformance()" disabled>
+            <i class="fas fa-tachometer-alt me-2"></i>测试性能监控
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2><i class="fas fa-exclamation-triangle me-2"></i>错误与离线测试</h2>
+      <div class="row g-3">
+        <div class="col-md-3 col-sm-6">
+          <button class="btn btn-outline-secondary w-100 test-button" onclick="testError()" disabled>
+            <i class="fas fa-bug me-2"></i>测试 JavaScript 错误
+          </button>
+        </div>
+        <div class="col-md-3 col-sm-6">
+          <button class="btn btn-outline-secondary w-100 test-button" onclick="testPromiseError()" disabled>
+            <i class="fas fa-code me-2"></i>测试 Promise 错误
+          </button>
+        </div>
+        <div class="col-md-3 col-sm-6">
+          <button class="btn btn-outline-secondary w-100 test-button" onclick="testMultipleEvents()" disabled>
+            <i class="fas fa-layer-group me-2"></i>发送多个事件
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2><i class="fas fa-key me-2"></i>会话管理测试</h2>
+      <div class="row g-3">
+        <div class="col-md-3 col-sm-6">
+          <button class="btn btn-outline-dark w-100 test-button" onclick="testSessionId()" disabled>
+            <i class="fas fa-key me-2"></i>获取会话 ID
+          </button>
+        </div>
+        <div class="col-md-3 col-sm-6">
+          <button class="btn btn-outline-dark w-100 test-button" onclick="testSessionContext()" disabled>
+            <i class="fas fa-sitemap me-2"></i>获取会话上下文
+          </button>
+        </div>
+        <div class="col-md-3 col-sm-6">
+          <button class="btn btn-outline-dark w-100 test-button" onclick="testSessionStats()" disabled>
+            <i class="fas fa-chart-bar me-2"></i>获取会话统计
+          </button>
+        </div>
+        <div class="col-md-3 col-sm-6">
+          <button class="btn btn-outline-danger w-100 test-button" onclick="testEndSession()" disabled>
+            <i class="fas fa-sign-out-alt me-2"></i>结束会话
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2><i class="fas fa-walking me-2"></i>行为追踪测试</h2>
+      <div class="row g-3">
+        <div class="col-md-3 col-sm-6">
+          <button class="btn btn-outline-success w-100 test-button" onclick="testTrackBehavior()" disabled>
+            <i class="fas fa-mouse-pointer me-2"></i>发送行为事件
+          </button>
+        </div>
+        <div class="col-md-3 col-sm-6">
+          <button class="btn btn-outline-success w-100 test-button" onclick="testTrackPageView()" disabled>
+            <i class="fas fa-eye me-2"></i>发送页面浏览
+          </button>
+        </div>
+        <div class="col-md-3 col-sm-6">
+          <button class="btn btn-outline-success w-100 test-button" onclick="testBehaviorContext()" disabled>
+            <i class="fas fa-brain me-2"></i>获取行为上下文
+          </button>
+        </div>
+        <div class="col-md-3 col-sm-6">
+          <button class="btn btn-outline-danger w-100 test-button" onclick="testClearBehavior()" disabled>
+            <i class="fas fa-broom me-2"></i>清除行为路径
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2><i class="fas fa-plug me-2"></i>插件管理测试</h2>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <button class="btn btn-outline-primary w-100 test-button" onclick="testPlugins()" disabled>
+            <i class="fas fa-cubes me-2"></i>测试插件管理器
+          </button>
+        </div>
+        <div class="col-md-6">
+          <button class="btn btn-outline-primary w-100 test-button" onclick="testCustomPlugin()" disabled>
+            <i class="fas fa-code-branch me-2"></i>测试自定义插件
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2><i class="fas fa-sitemap me-2"></i>插件上下文测试</h2>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <button class="btn btn-outline-info w-100 test-button" onclick="testPluginContext()" disabled>
+            <i class="fas fa-link me-2"></i>测试插件上下文
+          </button>
+        </div>
+        <div class="col-md-6">
+          <button class="btn btn-outline-info w-100 test-button" onclick="testPluginDependencies()" disabled>
+            <i class="fas fa-chains me-2"></i>测试插件依赖
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <footer class="text-center py-4 mt-5 border-top">
+      <p class="text-muted mb-1">Node Trace v0.1.0 | 高性能跨端事件追踪 SDK</p>
+      <p class="text-muted mb-0">© 2026 Node Trace Team</p>
+    </footer>
+  </div>
+
+  <script src="/dist/index.global.js"></script>
+  <script>
+    const resultDiv = document.getElementById('result');
+    const initButton = document.getElementById('initButton');
+    const initStatus = document.getElementById('initStatus');
+    const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+    let isInitialized = false;
+    let sidebarInstance = null;
+    
+    function log(message, type = 'default') {
+      const timestamp = new Date().toLocaleTimeString();
+      const logEntry = document.createElement('p');
+      logEntry.textContent = `${timestamp}: ${message}`;  
+      if (type === 'success') {
+        logEntry.classList.add('success');
+      } else if (type === 'error') {
+        logEntry.classList.add('error');
+      } else if (type === 'info') {
+        logEntry.classList.add('info');
+      }
+      resultDiv.appendChild(logEntry);
+      resultDiv.scrollTop = resultDiv.scrollHeight;
+      openSidebar();
+    }
+    
+    function logObject(obj) {
+      try {
+        const jsonString = JSON.stringify(obj, null, 2);
+        log(jsonString);
+      } catch (error) {
+        log(`对象序列化失败: ${error.message}`, 'error');
+      }
+    }
+    
+    function toggleSidebar() {
+      if (!sidebarInstance) {
+        sidebarInstance = new bootstrap.Offcanvas(document.getElementById('resultSidebar'));
+      }
+      sidebarInstance.toggle();
+    }
+    
+    function openSidebar() {
+      if (!sidebarInstance) {
+        sidebarInstance = new bootstrap.Offcanvas(document.getElementById('resultSidebar'));
+      }
+      sidebarInstance.show();
+    }
+    
+    function clearResults() {
+      resultDiv.innerHTML = '<p class="info"><i class="fas fa-info-circle me-2"></i>结果已清除</p>';
+    }
+    
+    function copyResults() {
+      const text = resultDiv.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        log('结果已复制到剪贴板', 'success');
+      }).catch(err => {
+        log('复制失败: ' + err.message, 'error');
+      });
+    }
+    
+    function enableTestButtons() {
+      const testButtons = document.querySelectorAll('.test-button');
+      testButtons.forEach(button => {
+        button.disabled = false;
+      });
+      initStatus.textContent = '✓ 初始化成功，所有测试功能已启用';
+      initStatus.classList.add('success');
+      initButton.innerHTML = '<i class="fas fa-check me-2"></i>已初始化';
+      initButton.disabled = true;
+      isInitialized = true;
+      
+      sidebarToggleBtn.disabled = false;
+    }
+    
+    function disableTestButtons() {
+      const testButtons = document.querySelectorAll('.test-button');
+      testButtons.forEach(button => {
+        button.disabled = true;
+      });
+      initStatus.textContent = '✗ 初始化失败，请刷新页面重试';
+      initStatus.classList.add('error');
+      initButton.innerHTML = '<i class="fas fa-redo me-2"></i>重新初始化';
+      initButton.disabled = false;
+      isInitialized = false;
+    }
+    
+    function checkInitialized() {
+      if (!isInitialized) {
+        log('⚠️ 请先初始化追踪系统', 'info');
+        return false;
+      }
+      return true;
+    }
+    
+    function testInit() {
+      try {
+        log('开始初始化 Node Trace...', 'info');
+        initButton.disabled = true;
+        initButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>初始化中...';
+        
+        nodeTrace.init({
+          appId: 'test-app',
+          appKey: 'test-app-key',
+          endpoint: 'https://httpbin.org/post',
+          debug: true,
+          offlineEnabled: true,
+          batchSize: 10,
+          batchInterval: 2000
+        });
+        
+        log('加载插件...', 'info');
+        nodeTrace.use(nodeTrace.errorPlugin);
+        nodeTrace.use(nodeTrace.performancePlugin);
+        nodeTrace.use(nodeTrace.sessionPlugin);
+        nodeTrace.use(nodeTrace.behaviorPlugin);
+        nodeTrace.use(nodeTrace.networkPlugin);
+        nodeTrace.use(nodeTrace.browserPlugin);
+        nodeTrace.use(nodeTrace.userPlugin);
+        nodeTrace.use(nodeTrace.pageviewPlugin);
+        
+        log('初始化成功 ✓', 'success');
+        log('插件加载完成 ✓', 'success');
+        log('已加载插件: error, performance, session, behavior, network, browser, user, pageview', 'info');
+        
+        enableTestButtons();
+      } catch (error) {
+        log(`初始化失败: ${error.message}`, 'error');
+        disableTestButtons();
+      }
+    }
+    
+    function testTrack() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('发送测试事件...', 'info');
+        nodeTrace.track('test_event', {
+          test_property: 'test_value',
+          test_number: 123,
+          test_boolean: true,
+          timestamp: new Date().toISOString()
+        });
+        log('事件发送成功 ✓', 'success');
+        setTimeout(checkStorage, 500);
+      } catch (error) {
+        log(`事件发送失败: ${error.message}`, 'error');
+      }
+    }
+    
+    function testFlush() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('手动触发事件发送...', 'info');
+        nodeTrace.flush();
+        log('手动触发发送成功 ✓', 'success');
+        setTimeout(checkStorage, 1000);
+      } catch (error) {
+        log(`手动触发发送失败: ${error.message}`, 'error');
+      }
+    }
+    
+    function checkStorage() {
+      try {
+        log('查看存储信息...', 'info');
+        const queue = localStorage.getItem('node-trace-queue');
+        const offline = localStorage.getItem('node-trace-offline');
+        log(`队列长度: ${queue ? JSON.parse(queue).length : 0}`, 'info');
+        log(`离线事件数: ${offline ? JSON.parse(offline).length : 0}`, 'info');
+      } catch (error) {
+        log(`查看存储信息失败: ${error.message}`, 'error');
+      }
+    }
+    
+    function clearStorage() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('清除本地存储...', 'info');
+        localStorage.removeItem('node-trace-queue');
+        localStorage.removeItem('node-trace-offline');
+        localStorage.removeItem('node-trace-device-id');
+        localStorage.removeItem('node-trace-user-id');
+        log('本地存储清除成功 ✓', 'success');
+      } catch (error) {
+        log(`清除本地存储失败: ${error.message}`, 'error');
+      }
+    }
+    
+    function testDeviceId() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('获取设备 ID...', 'info');
+        const deviceId = nodeTrace.getDeviceId();
+        log(`设备 ID: ${deviceId}`, 'info');
+        log('设备 ID 获取成功 ✓', 'success');
+      } catch (error) {
+        log(`获取设备 ID 失败: ${error.message}`, 'error');
+      }
+    }
+    
+    function testTrackWithDeviceId() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('发送带设备 ID 的事件...', 'info');
+        const deviceId = nodeTrace.getDeviceId();
+        nodeTrace.track('test_event_with_device_id', {
+          device_id: deviceId,
+          test_property: 'test_value',
+          timestamp: new Date().toISOString()
+        });
+        log('带设备 ID 的事件发送成功 ✓', 'success');
+        log(`使用的设备 ID: ${deviceId}`, 'info');
+      } catch (error) {
+        log(`发送带设备 ID 的事件失败: ${error.message}`, 'error');
+      }
+    }
+    
+    function testSetID() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('设置用户 ID...', 'info');
+        const customId = 'custom_user_' + Date.now();
+        nodeTrace.setID(customId);
+        log('用户 ID 设置成功 ✓', 'success');
+        log(`设置的用户 ID: ${customId}`, 'info');
+      } catch (error) {
+        log(`设置用户 ID 失败: ${error.message}`, 'error');
+      }
+    }
+    
+    function testGetID() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('获取用户 ID...', 'info');
+        const userId = nodeTrace.getID();
+        log('用户 ID 获取成功 ✓', 'success');
+        log(`用户 ID: ${userId}`, 'info');
+      } catch (error) {
+        log(`获取用户 ID 失败: ${error.message}`, 'error');
+      }
+    }
+    
+    function testClearID() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('清除用户 ID...', 'info');
+        nodeTrace.clearID();
+        log('用户 ID 清除成功 ✓', 'success');
+      } catch (error) {
+        log(`清除用户 ID 失败: ${error.message}`, 'error');
+      }
+    }
+    
+    function testGenerateStableDeviceId() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('异步生成稳定的设备 ID...', 'info');
+        nodeTrace.generateStableDeviceIdAsync().then(deviceId => {
+          log('稳定的设备 ID 生成成功 ✓', 'success');
+          log(`生成的设备 ID: ${deviceId}`, 'info');
+          log('注意: 此 ID 使用浏览器指纹技术生成，更稳定且难以伪造', 'info');
+        }).catch(error => {
+          log(`生成稳定的设备 ID 失败: ${error.message}`, 'error');
+        });
+      } catch (error) {
+        log(`测试异步生成设备 ID 失败: ${error.message}`, 'error');
+      }
+    }
+    
+    function testGetBrowserData() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('获取浏览器数据...', 'info');
+        const browserData = nodeTrace.getBrowserData();
+        log('浏览器数据获取成功 ✓', 'success');
+        logObject(browserData);
+      } catch (error) {
+        log(`获取浏览器数据失败: ${error.message}`, 'error');
+      }
+    }
+    
+    function testTrackWithBrowserData() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('发送带浏览器数据的事件...', 'info');
+        const browserData = nodeTrace.getBrowserData();
+        nodeTrace.track('test_event_with_browser_data', {
+          ...browserData,
+          test_property: 'test_value',
+          timestamp: new Date().toISOString()
+        });
+        log('带浏览器数据的事件发送成功 ✓', 'success');
+      } catch (error) {
+        log(`发送带浏览器数据的事件失败: ${error.message}`, 'error');
+      }
+    }
+    
+    function testNetworkRequest() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('开始测试网络请求...', 'info');
+        
+        log('测试 fetch 请求...', 'info');
+        fetch('https://jsonplaceholder.typicode.com/todos/1')
+          .then(response => response.json())
+          .then(data => {
+            log('fetch 请求成功，返回数据:', 'info');
+            logObject(data);
+          })
+          .catch(error => {
+            log(`fetch 请求失败: ${error.message}`, 'error');
+          });
+        
+        log('测试 XMLHttpRequest 请求...', 'info');
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', 'https://jsonplaceholder.typicode.com/todos/2');
+        xhr.onload = function() {
+          if (xhr.status === 200) {
+            log('XMLHttpRequest 请求成功，返回数据:', 'info');
+            try {
+              const data = JSON.parse(xhr.responseText);
+              logObject(data);
+            } catch (e) {
+              log('无法解析响应数据', 'error');
+            }
+          } else {
+            log(`XMLHttpRequest 请求失败: ${xhr.status}`, 'error');
+          }
+        };
+        xhr.onerror = function() {
+          log('XMLHttpRequest 请求错误', 'error');
+        };
+        xhr.send();
+        
+        log('网络请求测试完成，请查看控制台输出的 network_request 事件', 'info');
+      } catch (error) {
+        log(`测试网络请求失败: ${error.message}`, 'error');
+      }
+    }
+    
+    function testPerformance() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('测试性能监控...', 'info');
+        log('性能数据将在页面加载完成后自动收集', 'info');
+        log('请查看控制台输出的 performance 事件', 'info');
+      } catch (error) {
+        log(`测试性能监控失败: ${error.message}`);
+      }
+    }
+    
+    function testError() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('测试 JavaScript 错误...', 'info');
+        throw new Error('测试 JavaScript 错误');
+      } catch (error) {
+        log(`JavaScript 错误已触发 ✓`, 'success');
+      }
+    }
+    
+    function testPromiseError() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('测试 Promise 错误...', 'info');
+        Promise.reject(new Error('测试 Promise 错误')).catch(() => {
+          log('Promise 错误已触发 ✓', 'success');
+        });
+      } catch (error) {
+        log(`测试 Promise 错误失败: ${error.message}`);
+      }
+    }
+    
+    function testMultipleEvents() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('开始发送多个事件...', 'info');
+        
+        for (let i = 0; i < 10; i++) {
+          nodeTrace.track(`event_${i}`, {
+            count: i,
+            timestamp: new Date().toISOString()
+          });
+          log(`事件 ${i} 发送成功`);
+        }
+        
+        log('多个事件发送完成 ✓');
+        setTimeout(checkStorage, 500);
+      } catch (error) {
+        log(`发送多个事件失败: ${error.message}`);
+      }
+    }
+    
+    function testSessionId() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('获取会话 ID...', 'info');
+        const sessionId = nodeTrace.sessions.getID();
+        log('会话 ID 获取成功 ✓', 'success');
+        log(`会话 ID: ${sessionId}`, 'info');
+      } catch (error) {
+        log(`获取会话 ID 失败: ${error.message}`, 'error');
+      }
+    }
+    
+    function testSessionContext() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('获取会话上下文...', 'info');
+        const sessionContext = nodeTrace.sessions.getContext();
+        log('会话上下文获取成功 ✓', 'success');
+        logObject(sessionContext);
+      } catch (error) {
+        log(`获取会话上下文失败: ${error.message}`, 'error');
+      }
+    }
+    
+    function testSessionStats() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('获取会话统计...');
+        for (let i = 0; i < 3; i++) {
+          nodeTrace.track(`session_test_event_${i}`, { test: 'value' });
+        }
+        nodeTrace.track('pageview', { path: '/test' });
+        const sessionContext = nodeTrace.sessions.getContext();
+        log('会话统计获取成功 ✓', 'success');
+        log(`页面浏览次数: ${sessionContext?.session_page_views}`, 'info');
+        log(`事件次数: ${sessionContext?.session_events}`, 'info');
+        log(`会话持续时间: ${sessionContext?.session_duration}ms`, 'info');
+        log(`会话是否新: ${sessionContext?.session_is_new}`, 'info');
+      } catch (error) {
+        log(`获取会话统计失败: ${error.message}`, 'error');
+      }
+    }
+    
+    function testEndSession() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('结束会话...', 'info');
+        nodeTrace.sessions.stop();
+        log('会话已结束 ✓', 'success');
+        setTimeout(checkStorage, 500);
+      } catch (error) {
+        log(`结束会话失败: ${error.message}`, 'error');
+      }
+    }
+    
+    function testTrackBehavior() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('发送行为事件...', 'info');
+        nodeTrace.behaviors.track('user_click', {
+          element_id: 'test-button',
+          element_type: 'button',
+          action: 'click',
+          timestamp: new Date().toISOString()
+        });
+        log('行为事件发送成功 ✓', 'success');
+      } catch (error) {
+        log(`发送行为事件失败: ${error.message}`, 'error');
+      }
+    }
+    
+    function testTrackPageView() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('发送页面浏览...', 'info');
+        nodeTrace.behaviors.trackView({
+          path: window.location.pathname,
+          referrer: document.referrer,
+          timestamp: new Date().toISOString()
+        });
+        log('页面浏览发送成功 ✓', 'success');
+      } catch (error) {
+        log(`发送页面浏览失败: ${error.message}`, 'error');
+      }
+    }
+    
+    function testBehaviorContext() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('获取行为上下文...', 'info');
+        for (let i = 0; i < 5; i++) {
+          nodeTrace.behaviors.track(`behavior_event_${i}`, { test: 'value' });
+        }
+        const behaviorContext = nodeTrace.behaviors.getContext();
+        log('行为上下文获取成功 ✓', 'success');
+        log(`行为步骤数: ${behaviorContext?.behavior_steps}`, 'info');
+        log(`唯一事件数: ${behaviorContext?.behavior_unique_events}`, 'info');
+        log(`平均步骤间隔时间: ${behaviorContext?.behavior_avg_time_between_steps}ms`, 'info');
+        log(`最后事件: ${behaviorContext?.last_event}`, 'info');
+        log(`最后事件时间: ${behaviorContext?.last_event_time ? new Date(behaviorContext.last_event_time).toLocaleTimeString() : 'N/A'}`, 'info');
+      } catch (error) {
+        log(`获取行为上下文失败: ${error.message}`, 'error');
+      }
+    }
+    
+    function testClearBehavior() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('清除行为路径...', 'info');
+        nodeTrace.behaviors.clear();
+        log('行为路径已清除 ✓', 'success');
+        setTimeout(checkStorage, 500);
+      } catch (error) {
+        log(`清除行为路径失败: ${error.message}`, 'error');
+      }
+    }
+    
+    function testPlugins() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('测试插件管理器...', 'info');
+        const plugins = nodeTrace.plugins;
+        if (plugins) {
+          log('插件管理器获取成功 ✓', 'success');
+          const allPlugins = plugins.getAll();
+          log(`当前注册的插件数: ${allPlugins.length}`, 'info');
+          const enabledPlugins = plugins.getEnabled();
+          log(`当前启用的插件数: ${enabledPlugins.length}`, 'info');
+          allPlugins.forEach(plugin => {
+            const status = plugin.enabled ? '启用' : '禁用';
+            log(`- ${plugin.name} (${status})`, 'info');
+          });
+        } else {
+          log('插件管理器未初始化', 'error');
+        }
+      } catch (error) {
+        log(`测试插件管理器失败: ${error.message}`, 'error');
+      }
+    }
+    
+    function testCustomPlugin() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('测试自定义插件...', 'info');
+        const customPlugin = {
+          name: 'custom-test-plugin',
+          priority: 10,
+          onTrack(event) {
+            return {
+              ...event,
+              properties: {
+                ...event.properties,
+                custom_property: 'custom_value',
+                plugin_version: '1.0.0'
+              }
+            };
+          }
+        };
+        nodeTrace.use(customPlugin);
+        log('自定义插件注册成功 ✓', 'success');
+        nodeTrace.track('test_with_custom_plugin', { test: 'value' });
+        log('使用自定义插件发送事件成功 ✓', 'success');
+      } catch (error) {
+        log(`测试自定义插件失败: ${error.message}`, 'error');
+      }
+    }
+    
+    function testPluginContext() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('测试插件上下文...', 'info');
+        const contextPlugin = {
+          name: 'context-test-plugin',
+          dependencies: ['session'],
+          
+          setup(context) {
+            log('上下文测试插件初始化...');
+            
+            const sessionPlugin = context.getPlugin('session');
+            if (sessionPlugin) {
+              log('成功获取 session 插件 ✓');
+            } else {
+              log('获取 session 插件失败');
+            }
+            
+            const sessionId = nodeTrace.sessions.getID();
+            if (sessionId) {
+              log(`成功获取会话 ID: ${sessionId} ✓`);
+            } else {
+              log('获取会话 ID 失败');
+            }
+            
+            const allPlugins = context.getAllPlugins();
+            log(`当前注册的插件数: ${allPlugins.length}`, 'info');
+            
+            log('插件上下文测试成功 ✓', 'success');
+          },
+          
+          onTrack(event) {
+            return {
+              ...event,
+              properties: {
+                ...event.properties,
+                context_test: 'success'
+              }
+            };
+          }
+        };
+        
+        nodeTrace.use(contextPlugin);
+        log('上下文测试插件注册成功 ✓', 'success');
+        
+        nodeTrace.track('test_with_context', { test: 'value' });
+        log('使用上下文测试插件发送事件成功 ✓', 'success');
+      } catch (error) {
+        log(`测试插件上下文失败: ${error.message}`, 'error');
+      }
+    }
+    
+    function testPluginDependencies() {
+      if (!checkInitialized()) return;
+      
+      try {
+        log('测试插件依赖...', 'info');
+        
+        const pluginA = {
+          name: 'plugin-a',
+          setup() {
+            log('插件 A 初始化');
+          },
+          
+          getPluginAData() {
+            return { message: 'Hello from Plugin A', timestamp: Date.now() };
+          }
+        };
+        
+        const pluginB = {
+          name: 'plugin-b',
+          dependencies: ['plugin-a'],
+          
+          setup(context) {
+            log('插件 B 初始化');
+            
+            const pluginA = context.getPlugin('plugin-a');
+            if (pluginA) {
+              log('插件 B 成功获取插件 A ✓');
+              
+              const data = pluginA.getPluginAData ? pluginA.getPluginAData() : null;
+              if (data) {
+                log(`插件 B 调用插件 A 的方法: ${data.message}`);
+              }
+            } else {
+              log('插件 B 未能获取插件 A');
+            }
+            
+            log('插件依赖测试成功 ✓');
+          },
+          
+          onTrack(event) {
+            return {
+              ...event,
+              properties: {
+                ...event.properties,
+                plugin_b_active: true
+              }
+            };
+          }
+        };
+        
+        nodeTrace.use(pluginA);
+        log('插件 A 注册成功 ✓');
+        
+        nodeTrace.use(pluginB);
+        log('插件 B 注册成功 ✓');
+        
+        nodeTrace.track('test_with_dependencies', { test: 'value' });
+        log('使用依赖插件发送事件成功 ✓');
+      } catch (error) {
+        log(`测试插件依赖失败: ${error.message}`);
+      }
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
