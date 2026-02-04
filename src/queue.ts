@@ -102,6 +102,11 @@ let timer: ReturnType<typeof setTimeout> | null = null
 let retryTimers: ReturnType<typeof setTimeout>[] = []
 
 /**
+ * 事件 ID 映射，用于快速去重
+ */
+const eventIdMap = new Map<string, boolean>()
+
+/**
  * 队列状态管理
  */
 const queueState = {
@@ -160,31 +165,39 @@ const queueState = {
 }
 
 /**
+ * 检查是否需要更新缓存
+ * @returns {boolean} 是否需要更新缓存
+ */
+function shouldUpdateCache(): boolean {
+  const queueLengthChange = Math.abs(state.queue.length - queueState.lastQueueLength)
+  if (queueLengthChange > queueState.queueLengthThreshold) {
+    queueState.lastQueueLength = state.queue.length
+    return true
+  }
+  
+  const nowTime = now()
+  if (nowTime - queueState.lastCacheTime < queueState.cacheExpiry) {
+    return false
+  }
+  
+  return true
+}
+
+/**
  * 计算队列压力
  * @returns {number} 队列压力值 (0-1)
  */
 function calculateQueuePressure(): number {
   queueState.cacheRequests++
-  const nowTime = now()
   
-  // 检查队列长度是否发生显著变化
-  const queueLengthChange = Math.abs(state.queue.length - queueState.lastQueueLength)
-  if (queueLengthChange > queueState.queueLengthThreshold) {
-    // 队列长度变化显著，立即更新缓存
-    queueState.lastQueueLength = state.queue.length
-  } else {
-    // 检查缓存是否有效
-    if (nowTime - queueState.lastCacheTime < queueState.cacheExpiry) {
-      queueState.cacheHits++
-      return queueState.cachedQueuePressure
-    }
+  if (!shouldUpdateCache()) {
+    queueState.cacheHits++
+    return queueState.cachedQueuePressure
   }
   
   const maxQueueSize = state.options?.maxQueueSize || QUEUE_CONSTANTS.DEFAULT_MAX_QUEUE_SIZE
   const pressure = state.queue.length / maxQueueSize
   
-  // 动态调整缓存过期时间
-  // 队列压力越大，缓存过期时间越短，以获得更实时的压力值
   if (pressure > QUEUE_CONSTANTS.QUEUE_PRESSURE_HIGH) {
     queueState.cacheExpiry = Math.max(QUEUE_CONSTANTS.CACHE_EXPIRY * 0.5, 200)
   } else if (pressure < QUEUE_CONSTANTS.QUEUE_PRESSURE_LOW) {
@@ -193,9 +206,8 @@ function calculateQueuePressure(): number {
     queueState.cacheExpiry = QUEUE_CONSTANTS.CACHE_EXPIRY
   }
   
-  // 更新缓存
   queueState.cachedQueuePressure = pressure
-  queueState.lastCacheTime = nowTime
+  queueState.lastCacheTime = now()
   queueState.lastQueueLength = state.queue.length
   
   return pressure
@@ -207,19 +219,10 @@ function calculateQueuePressure(): number {
  */
 function getDynamicQueueSize(): number {
   queueState.cacheRequests++
-  const nowTime = now()
   
-  // 检查队列长度是否发生显著变化
-  const queueLengthChange = Math.abs(state.queue.length - queueState.lastQueueLength)
-  if (queueLengthChange > queueState.queueLengthThreshold) {
-    // 队列长度变化显著，立即更新缓存
-    queueState.lastQueueLength = state.queue.length
-  } else {
-    // 检查缓存是否有效
-    if (nowTime - queueState.lastCacheTime < queueState.cacheExpiry) {
-      queueState.cacheHits++
-      return queueState.cachedDynamicQueueSize
-    }
+  if (!shouldUpdateCache()) {
+    queueState.cacheHits++
+    return queueState.cachedDynamicQueueSize
   }
   
   const baseSize = state.options?.maxQueueSize || QUEUE_CONSTANTS.DEFAULT_MAX_QUEUE_SIZE
@@ -227,18 +230,14 @@ function getDynamicQueueSize(): number {
   
   let dynamicSize = baseSize
   
-  // 根据队列压力动态调整队列大小
   if (pressure > 0.8) {
-    // 队列压力大，减小队列大小，加快发送频率
     dynamicSize = Math.max(baseSize * 0.8, 500)
   } else if (pressure < 0.3) {
-    // 队列压力小，增加队列大小，减少发送频率
     dynamicSize = Math.min(baseSize * 1.2, 2000)
   }
   
-  // 更新缓存
   queueState.cachedDynamicQueueSize = dynamicSize
-  queueState.lastCacheTime = nowTime
+  queueState.lastCacheTime = now()
   
   return dynamicSize
 }
@@ -326,35 +325,25 @@ function checkNetworkState() {
 
 /**
  * 选择发送策略
- * @param {any} data - 要发送的数据
+ * @param {string} body - 已序列化的数据
+ * @param {number} bodySize - 数据大小
  * @returns {'beacon' | 'fetch' | 'xhr'} 发送策略
  */
-function selectSendStrategy(data: any): 'beacon' | 'fetch' | 'xhr' {
-  const body = JSON.stringify(data)
-  const bodySize = body.length
-
-  // 检查网络状态
+function selectSendStrategy(body: string, bodySize: number): 'beacon' | 'fetch' | 'xhr' {
   checkNetworkState()
 
-  // 基于网络状态选择策略
   if (networkState.type === 'offline') {
-    // 离线状态，使用 beacon 作为最佳选择（浏览器会缓存发送）
     return 'beacon'
   } else if (networkState.type === 'slow') {
-    // 慢速网络，使用 fetch 可以设置超时和重试
     return 'fetch'
   }
 
-  // 基于数据大小选择策略
   if (bodySize > QUEUE_CONSTANTS.BEACON_SIZE_LIMIT) {
-    // 数据大小超过 beacon 的限制（64KB），使用 fetch
     return 'fetch'
   } else if (bodySize < QUEUE_CONSTANTS.SMALL_DATA_THRESHOLD) {
-    // 小数据，使用 beacon 更高效
     return 'beacon'
   }
 
-  // 中等大小数据，优先使用 fetch
   return 'fetch'
 }
 
@@ -411,9 +400,10 @@ async function send(endpoint: string, data: any): Promise<boolean> {
   const options = state.options
   const timeout = options?.timeout || QUEUE_CONSTANTS.DEFAULT_TIMEOUT
 
-  // 选择发送策略
-  const strategy = selectSendStrategy(data)
   const body = JSON.stringify(data)
+  const bodySize = body.length
+
+  const strategy = selectSendStrategy(body, bodySize)
 
   try {
     if (strategy === 'beacon' && navigator.sendBeacon) {
@@ -427,8 +417,7 @@ async function send(endpoint: string, data: any): Promise<boolean> {
         if (options?.debug) {
           console.log('[Node-Trace] Beacon failed, falling back to fetch:', error)
         }
-        // navigator.sendBeacon 失败，回退到 fetch
-        handleNetworkError(error, { endpoint, method: 'beacon', dataSize: body.length })
+        handleNetworkError(error, { endpoint, method: 'beacon', dataSize: bodySize })
       }
     }
 
@@ -455,12 +444,10 @@ async function send(endpoint: string, data: any): Promise<boolean> {
         if (options?.debug) {
           console.log('[Node-Trace] Fetch failed, falling back to XHR:', error)
         }
-        // fetch 失败，回退到 XHR
-        handleNetworkError(error, { endpoint, method: 'fetch', dataSize: body.length })
+        handleNetworkError(error, { endpoint, method: 'fetch', dataSize: bodySize })
       }
     }
 
-    // 最终回退到 XHR
     try {
       const xhrSuccess = await sendWithXHR(endpoint, data, timeout)
       if (options?.debug) {
@@ -468,14 +455,14 @@ async function send(endpoint: string, data: any): Promise<boolean> {
       }
       return xhrSuccess
     } catch (error) {
-      handleNetworkError(error, { endpoint, method: 'xhr', dataSize: body.length })
+      handleNetworkError(error, { endpoint, method: 'xhr', dataSize: bodySize })
       return false
     }
   } catch (error) {
     if (options?.debug) {
       console.log('[Node-Trace] All send strategies failed:', error)
     }
-    handleNetworkError(error, { endpoint, dataSize: body.length })
+    handleNetworkError(error, { endpoint, dataSize: bodySize })
     return false
   }
 }
@@ -487,13 +474,8 @@ async function send(endpoint: string, data: any): Promise<boolean> {
  * @returns {boolean} 是否已存在
  */
 function isEventExists<T extends EventProperties>(event: Payload<T>): boolean {
-  // 检查是否存在相同事件（基于事件ID或事件名称和时间戳）
-  return state.queue.some(existingEvent => {
-    // 事件ID相同，或者事件名称相同且时间戳相近（100ms内）认为是同一事件
-    return existingEvent.id === event.id || 
-           (existingEvent.event === event.event && 
-            Math.abs(existingEvent.timestamp - event.timestamp) < 100)
-  })
+  const eventKey = `${event.id}_${event.event}_${event.timestamp}`
+  return eventIdMap.has(eventKey)
 }
 
 /**
@@ -502,36 +484,35 @@ function isEventExists<T extends EventProperties>(event: Payload<T>): boolean {
  * @param {Payload<T>} event - 事件数据
  */
 export function push<T extends EventProperties>(event: Payload<T>) {
-  // 检查事件是否已存在，避免重复上报
   if (isEventExists(event)) {
-    // 调试模式
     if (state.options?.debug) {
       console.log('[Node-Trace] Event already exists in queue, skipping:', event.event)
     }
     return
   }
   
-  // 使用动态队列大小
   const maxQueueSize = getDynamicQueueSize()
-  
-  // 计算并更新队列压力
   queueState.pressure = calculateQueuePressure()
   
-  // 限制队列大小
   if (state.queue.length >= maxQueueSize) {
-    // 当队列压力大时，优先移除最早的事件
+    let removeCount = 1
     if (queueState.pressure > QUEUE_CONSTANTS.QUEUE_PRESSURE_VERY_HIGH) {
-      // 队列压力非常大，移除多个最早的事件
-      const removeCount = Math.min(Math.ceil(state.queue.length * QUEUE_CONSTANTS.QUEUE_CLEANUP_RATIO), QUEUE_CONSTANTS.MAX_CLEANUP_COUNT)
-      state.queue.splice(0, removeCount)
-    } else {
-      state.queue.shift() // 移除最早的事件
+      removeCount = Math.min(Math.ceil(state.queue.length * QUEUE_CONSTANTS.QUEUE_CLEANUP_RATIO), QUEUE_CONSTANTS.MAX_CLEANUP_COUNT)
+    } else if (queueState.pressure > QUEUE_CONSTANTS.QUEUE_PRESSURE_HIGH) {
+      removeCount = Math.min(Math.ceil(state.queue.length * 0.05), 5)
     }
+    
+    const removedEvents = state.queue.splice(0, removeCount)
+    removedEvents.forEach(e => {
+      const key = `${e.id}_${e.event}_${e.timestamp}`
+      eventIdMap.delete(key)
+    })
   }
   
   state.queue.push(event)
+  const eventKey = `${event.id}_${event.event}_${event.timestamp}`
+  eventIdMap.set(eventKey, true)
   
-  // 调试模式
   if (state.options?.debug) {
     console.log('[Node-Trace] Event pushed:', event)
     console.log('[Node-Trace] Queue state:', {
@@ -539,11 +520,9 @@ export function push<T extends EventProperties>(event: Payload<T>) {
       maxSize: maxQueueSize,
       pressure: queueState.pressure,
     })
-    // 输出缓存统计信息
     console.log('[Node-Trace] Cache stats:', getCacheStats())
   }
   
-  // 当队列压力超过阈值时，立即触发发送
   if (queueState.pressure > QUEUE_CONSTANTS.QUEUE_PRESSURE_HIGH) {
     if (timer) {
       clearTimeout(timer)
@@ -583,26 +562,25 @@ function schedule() {
 export async function flush() {
   if (!state.options || state.queue.length === 0) return
 
-  // 记录发送开始时间
   const sendStartTime = now()
   
-  // 实现自适应批量大小
   let batchSize = state.options?.batchSize || QUEUE_CONSTANTS.DEFAULT_BATCH_SIZE
   const pressure = calculateQueuePressure()
   
-  // 根据队列压力调整批量大小
   if (pressure > QUEUE_CONSTANTS.QUEUE_PRESSURE_MEDIUM) {
-    // 队列压力大，减小批量大小，加快发送频率
     batchSize = Math.max(Math.floor(batchSize * 0.8), QUEUE_CONSTANTS.MIN_BATCH_SIZE)
   } else if (pressure < QUEUE_CONSTANTS.QUEUE_PRESSURE_LOW) {
-    // 队列压力小，增大批量大小，减少发送频率
     batchSize = Math.min(Math.ceil(batchSize * 1.2), QUEUE_CONSTANTS.MAX_BATCH_SIZE)
   }
   
-  // 确保批量大小不超过队列长度
   batchSize = Math.min(batchSize, state.queue.length)
   
   let batch = state.queue.splice(0, batchSize) as Payload<EventProperties>[]
+  
+  batch.forEach(e => {
+    const key = `${e.id}_${e.event}_${e.timestamp}`
+    eventIdMap.delete(key)
+  })
 
   const beforeSendPlugins = plugins.sort()
   for (const p of beforeSendPlugins) {
@@ -621,10 +599,8 @@ export async function flush() {
     events: batch,
   })
 
-  // 计算发送时间
   const sendTime = now() - sendStartTime
   
-  // 更新队列状态
   queueState.lastSendTime = now()
   if (ok) {
     queueState.sendSuccessCount++
@@ -632,7 +608,6 @@ export async function flush() {
     queueState.sendFailCount++
   }
   
-  // 更新平均发送时间
   const totalSends = queueState.sendSuccessCount + queueState.sendFailCount
   if (totalSends > 0) {
     queueState.averageSendTime = (
@@ -652,7 +627,6 @@ export async function flush() {
   }
 
   if (!ok) {
-    // 调试模式
     if (state.options?.debug) {
       console.log('[Node-Trace] Send failed, handling retry or offline cache')
       console.log('[Node-Trace] Send statistics:', {
@@ -662,7 +636,6 @@ export async function flush() {
       })
     }
     
-    // 离线缓存
     const offlineEnabled = state.options?.offlineEnabled || false
     if (offlineEnabled && isBrowser()) {
       try {
@@ -672,20 +645,20 @@ export async function flush() {
           console.log('[Node-Trace] Events cached offline:', batch.length)
         }
       } catch (error) {
-        // 忽略存储错误，但记录
         handleStorageError(error, { eventCount: batch.length })
       }
     } else {
-      // 只有在离线缓存未启用时才使用重试机制，避免重复
       const retryCount = state.options?.retryCount || 0
       if (retryCount > 0) {
-        // 实现指数退避的重试间隔
         const baseInterval = state.options?.retryInterval || 1000
         const retryInterval = baseInterval * Math.pow(2, queueState.sendFailCount % QUEUE_CONSTANTS.MAX_RETRY_COUNT)
         
-        // 实现带间隔的重试
         const retryTimer = setTimeout(() => {
           state.queue.unshift(...batch)
+          batch.forEach(e => {
+            const key = `${e.id}_${e.event}_${e.timestamp}`
+            eventIdMap.set(key, true)
+          })
           if (state.options?.debug) {
             console.log('[Node-Trace] Retrying failed events:', batch.length)
           }
@@ -696,7 +669,6 @@ export async function flush() {
       }
     }
   } else if (isBrowser()) {
-    // 发送成功，清除离线缓存
     await DB.clear()
     
     if (state.options?.debug) {
@@ -758,26 +730,29 @@ export async function restoreOfflineEvents() {
   try {
     const offlineEvents = await DB.all()
     if (offlineEvents.length > 0) {
-      // 检查队列中是否已有相同的事件，避免重复
+      const queueEventKeys = new Set<string>()
+      state.queue.forEach(e => {
+        const key = `${e.id}_${e.event}_${e.timestamp}`
+        queueEventKeys.add(key)
+      })
+      
       const eventsToAdd = offlineEvents.filter(offlineEvent => {
-        return !state.queue.some(queueEvent => {
-          // 基于事件名称和时间戳判断是否为同一事件
-          return queueEvent.event === offlineEvent.event && 
-                 Math.abs(queueEvent.timestamp - offlineEvent.timestamp) < 500
-        })
+        const key = `${offlineEvent.id}_${offlineEvent.event}_${offlineEvent.timestamp}`
+        return !queueEventKeys.has(key)
       })
       
       if (eventsToAdd.length > 0) {
-        // 提取要删除的事件ID
         const idsToDelete = eventsToAdd.map(event => event.id)
         
-        // 删除这些ID对应的事件
         if (idsToDelete.length > 0) {
           await DB.delete(idsToDelete)
         }
         
-        // 将事件添加到队列（保留id字段，以便在发送请求时包含）
         state.queue.unshift(...eventsToAdd)
+        eventsToAdd.forEach(e => {
+          const key = `${e.id}_${e.event}_${e.timestamp}`
+          eventIdMap.set(key, true)
+        })
         
         if (state.options?.debug) {
           console.log('[Node-Trace] Restored offline events:', eventsToAdd.length)
@@ -789,7 +764,6 @@ export async function restoreOfflineEvents() {
         
         schedule()
       } else {
-        // 所有事件都是重复的，直接清除离线存储
         await DB.clear()
         
         if (state.options?.debug) {
@@ -797,7 +771,7 @@ export async function restoreOfflineEvents() {
         }
       }
     }
-  } catch {
-    // 忽略恢复错误
+  } catch (error) {
+    handleStorageError(error, { eventCount: 0 })
   }
 }
