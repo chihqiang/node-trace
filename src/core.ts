@@ -111,18 +111,18 @@ class Plugins {
 
   /**
    * 创建插件上下文
-   * @private
    * @returns {IPluginContext} 插件上下文
    */
   private createPluginContext(): IPluginContext {
     return {
-      getPlugins: () => this,
+      getPlugins: () => Object.fromEntries(this.plugins) as unknown as Record<string, IPlugin>,
       getPlugin: (name: string) => this.plugins.get(name) || null,
       getAllPlugins: () => this.getAll(),
-      callPluginMethod: (pluginName: string, methodName: string, ...args: any[]) => {
+      callPluginMethod: (pluginName: string, methodName: string, ...args: unknown[]) => {
         const plugin = this.plugins.get(pluginName)
-        if (plugin && typeof (plugin as any)[methodName] === 'function') {
-          return (plugin as any)[methodName](...args)
+        if (plugin && typeof (plugin as unknown as Record<string, unknown>)[methodName] === 'function') {
+          const method = (plugin as unknown as Record<string, unknown>)[methodName] as (...args: unknown[]) => unknown
+          return method(...args)
         }
         return null
       }

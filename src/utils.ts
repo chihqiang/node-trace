@@ -167,21 +167,25 @@ export const objectUtils = {
   /**
    * 安全获取对象属性
    * @template T
-   * @param {any} obj - 目标对象
+   * @param {unknown} obj - 目标对象
    * @param {string|string[]} path - 属性路径
    * @param {T} defaultValue - 默认值
    * @returns {T} 获取到的值或默认值
    */
-  get: <T>(obj: any, path: string | string[], defaultValue: T): T => {
-    const travel = (regexp: RegExp, obj: any, path: string | string[]): any => {
+  get: <T>(obj: unknown, path: string | string[], defaultValue: T): T => {
+    const travel = (regexp: RegExp, obj: unknown, path: string | string[]): unknown => {
+      if (obj === null || obj === undefined) {
+        return defaultValue
+      }
+      const objRecord = obj as Record<string, unknown>
       const value = Array.isArray(path)
-        ? path.reduce((res, key) => (res !== null && res !== undefined ? res[key] : res), obj)
+        ? path.reduce<unknown>((res, key) => (res !== null && res !== undefined ? (res as Record<string, unknown>)[key] : res), objRecord)
         : regexp.test(path)
-        ? path.split(regexp).reduce((res, key) => (res !== null && res !== undefined ? res[key] : res), obj)
-        : obj[path]
+        ? path.split(regexp).reduce<unknown>((res, key) => (res !== null && res !== undefined ? (res as Record<string, unknown>)[key] : res), objRecord)
+        : objRecord[path]
       return value === undefined || value === null ? defaultValue : value
     }
-    return travel(/[\[\]\.]+/, obj, path)
+    return travel(/[\[\]\.]+/, obj, path) as T
   },
 
   /**

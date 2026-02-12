@@ -10,6 +10,18 @@
 export type EventProperties = Record<string, string | number | boolean | null | undefined>
 
 /**
+ * 扩展事件属性类型
+ * 允许插件添加额外的字段
+ */
+export type ExtendedEventProperties = {
+  device_id?: string
+  user_id?: string
+  session_id?: string
+  browser?: Record<string, unknown>
+  [key: string]: unknown
+}
+
+/**
  * 泛型事件负载接口
  * @template T - 事件属性类型
  */
@@ -33,7 +45,7 @@ export interface Payload<T extends EventProperties = EventProperties> {
   /**
    * 扩展参数
    */
-  [key: string]: any
+  [key: string]: unknown
 }
 
 /**
@@ -124,7 +136,7 @@ export interface IPluginContext {
   /**
    * 获取插件管理器实例
    */
-  getPlugins(): any
+  getPlugins(): Record<string, IPlugin>
   
   /**
    * 获取指定插件实例
@@ -143,10 +155,10 @@ export interface IPluginContext {
    * 调用插件方法
    * @param {string} pluginName - 插件名称
    * @param {string} methodName - 方法名称
-   * @param {any[]} args - 方法参数
-   * @returns {any} 方法返回值
+   * @param {unknown[]} args - 方法参数
+   * @returns {unknown} 方法返回值
    */
-  callPluginMethod(pluginName: string, methodName: string, ...args: any[]): any
+  callPluginMethod(pluginName: string, methodName: string, ...args: unknown[]): unknown
 }
 
 /**
@@ -246,15 +258,15 @@ export interface IPlugin {
   /**
    * 插件配置
    */
-  config?: Record<string, any>
+  config?: Record<string, unknown>
   
   /**
    * 插件状态
    */
-  state?: Record<string, any>
+  state?: Record<string, unknown>
   
   /**
    * 获取插件信息
    */
-  getInfo?: () => Record<string, any>
+  getInfo?: () => Record<string, unknown>
 }

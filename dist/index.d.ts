@@ -31,7 +31,7 @@ interface Payload<T extends EventProperties = EventProperties> {
     /**
      * 扩展参数
      */
-    [key: string]: any;
+    [key: string]: unknown;
 }
 /**
  * 配置选项接口
@@ -113,7 +113,7 @@ interface IPluginContext {
     /**
      * 获取插件管理器实例
      */
-    getPlugins(): any;
+    getPlugins(): Record<string, IPlugin>;
     /**
      * 获取指定插件实例
      * @param {string} name - 插件名称
@@ -129,10 +129,10 @@ interface IPluginContext {
      * 调用插件方法
      * @param {string} pluginName - 插件名称
      * @param {string} methodName - 方法名称
-     * @param {any[]} args - 方法参数
-     * @returns {any} 方法返回值
+     * @param {unknown[]} args - 方法参数
+     * @returns {unknown} 方法返回值
      */
-    callPluginMethod(pluginName: string, methodName: string, ...args: any[]): any;
+    callPluginMethod(pluginName: string, methodName: string, ...args: unknown[]): unknown;
 }
 /**
  * 插件接口
@@ -225,15 +225,15 @@ interface IPlugin {
     /**
      * 插件配置
      */
-    config?: Record<string, any>;
+    config?: Record<string, unknown>;
     /**
      * 插件状态
      */
-    state?: Record<string, any>;
+    state?: Record<string, unknown>;
     /**
      * 获取插件信息
      */
-    getInfo?: () => Record<string, any>;
+    getInfo?: () => Record<string, unknown>;
 }
 
 /**
@@ -254,7 +254,6 @@ declare class Plugins {
     private plugins;
     /**
      * 创建插件上下文
-     * @private
      * @returns {IPluginContext} 插件上下文
      */
     private createPluginContext;
@@ -643,16 +642,16 @@ declare const storageUtils: {
      * 安全获取本地存储
      * @param {string} key - 存储键
      * @param {Function} [parser] - 解析函数
-     * @returns {any} 存储值
+     * @returns {unknown} 存储值
      */
-    get: (key: string, parser?: (value: string) => any) => any;
+    get: (key: string, parser?: (value: string) => unknown) => unknown;
     /**
      * 安全设置本地存储
      * @param {string} key - 存储键
-     * @param {any} value - 存储值
+     * @param {unknown} value - 存储值
      * @returns {boolean} 是否设置成功
      */
-    set: (key: string, value: any) => boolean;
+    set: (key: string, value: unknown) => boolean;
     /**
      * 安全移除本地存储
      * @param {string} key - 存储键

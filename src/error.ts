@@ -67,11 +67,11 @@ export interface TraceError {
   /**
    * 错误上下文
    */
-  context?: Record<string, any>
+  context?: Record<string, unknown>
   /**
    * 错误详情
    */
-  details?: Record<string, any>
+  details?: Record<string, unknown>
   /**
    * 错误来源
    */
@@ -307,8 +307,8 @@ export class ErrorHandler {
    * 记录错误
    * @param {ErrorType} type - 错误类型
    * @param {string} message - 错误消息
-   * @param {any} [error] - 原始错误对象
-   * @param {Record<string, any>} [context] - 错误上下文
+   * @param {unknown} [error] - 原始错误对象
+   * @param {Record<string, unknown>} [context] - 错误上下文
    * @param {ErrorLevel} [level=error] - 错误级别
    * @param {string} [code] - 错误代码
    * @param {string} [source] - 错误来源
@@ -316,19 +316,22 @@ export class ErrorHandler {
   public captureError(
     type: ErrorType,
     message: string,
-    error?: any,
-    context?: Record<string, any>,
+    error?: unknown,
+    context?: Record<string, unknown>,
     level: ErrorLevel = 'error',
     code?: string,
     source?: string
   ): TraceError {
+    const errorObj = error as Error | undefined
+    const errorDetails = error as { details?: unknown } | undefined
+
     if (!this.config.capture) {
       const dummyError: TraceError = {
         type,
         level,
         message,
         code,
-        stack: error?.stack,
+        stack: errorObj?.stack,
         context,
         timestamp: Date.now(),
         id: this.generateErrorId()
@@ -339,8 +342,8 @@ export class ErrorHandler {
     // 解析错误堆栈
     let file: string | undefined
     let line: number | undefined
-    if (error?.stack) {
-      const stackInfo = this.parseStack(error.stack)
+    if (errorObj?.stack) {
+      const stackInfo = this.parseStack(errorObj.stack)
       file = stackInfo.file
       line = stackInfo.line
     }
@@ -351,17 +354,17 @@ export class ErrorHandler {
       level,
       message,
       code,
-      stack: error?.stack,
+      stack: errorObj?.stack,
       context,
-      details: error?.details,
+      details: errorDetails?.details as Record<string, unknown> | undefined,
       source: source || 'unknown',
       file,
       line,
       timestamp: Date.now(),
       id: this.generateErrorId(),
-      event: context?.event,
-      userId: context?.userId,
-      deviceId: context?.deviceId
+      event: context?.event as string | undefined,
+      userId: context?.userId as string | undefined,
+      deviceId: context?.deviceId as string | undefined
     }
 
     // 添加到错误队列
@@ -580,91 +583,91 @@ export class ErrorHandler {
 
   /**
    * 处理网络错误
-   * @param {any} error - 错误对象
-   * @param {Record<string, any>} [context] - 错误上下文
+   * @param {unknown} error - 错误对象
+   * @param {Record<string, unknown>} [context] - 错误上下文
    */
-  public handleNetworkError(error: any, context?: Record<string, any>): void {
+  public handleNetworkError(error: unknown, context?: Record<string, unknown>): void {
     this.captureError('network', 'Network error occurred', error, context)
   }
 
   /**
    * 处理存储错误
-   * @param {any} error - 错误对象
-   * @param {Record<string, any>} [context] - 错误上下文
+   * @param {unknown} error - 错误对象
+   * @param {Record<string, unknown>} [context] - 错误上下文
    */
-  public handleStorageError(error: any, context?: Record<string, any>): void {
+  public handleStorageError(error: unknown, context?: Record<string, unknown>): void {
     this.captureError('storage', 'Storage error occurred', error, context, 'warn')
   }
 
   /**
    * 处理浏览器 API 错误
-   * @param {any} error - 错误对象
-   * @param {Record<string, any>} [context] - 错误上下文
+   * @param {unknown} error - 错误对象
+   * @param {Record<string, unknown>} [context] - 错误上下文
    */
-  public handleBrowserError(error: any, context?: Record<string, any>): void {
+  public handleBrowserError(error: unknown, context?: Record<string, unknown>): void {
     this.captureError('browser', 'Browser API error occurred', error, context, 'warn')
   }
 
   /**
    * 处理插件错误
-   * @param {any} error - 错误对象
-   * @param {Record<string, any>} [context] - 错误上下文
+   * @param {unknown} error - 错误对象
+   * @param {Record<string, unknown>} [context] - 错误上下文
    */
-  public handlePluginError(error: any, context?: Record<string, any>): void {
+  public handlePluginError(error: unknown, context?: Record<string, unknown>): void {
     this.captureError('plugin', 'Plugin error occurred', error, context)
   }
 
   /**
    * 处理队列错误
-   * @param {any} error - 错误对象
-   * @param {Record<string, any>} [context] - 错误上下文
+   * @param {unknown} error - 错误对象
+   * @param {Record<string, unknown>} [context] - 错误上下文
    */
-  public handleQueueError(error: any, context?: Record<string, any>): void {
+  public handleQueueError(error: unknown, context?: Record<string, unknown>): void {
     this.captureError('queue', 'Queue error occurred', error, context)
   }
 
   /**
    * 处理设备 ID 错误
-   * @param {any} error - 错误对象
-   * @param {Record<string, any>} [context] - 错误上下文
+   * @param {unknown} error - 错误对象
+   * @param {Record<string, unknown>} [context] - 错误上下文
    */
-  public handleDeviceError(error: any, context?: Record<string, any>): void {
+  public handleDeviceError(error: unknown, context?: Record<string, unknown>): void {
     this.captureError('device', 'Device ID error occurred', error, context, 'warn')
   }
 
   /**
    * 处理会话错误
-   * @param {any} error - 错误对象
-   * @param {Record<string, any>} [context] - 错误上下文
+   * @param {unknown} error - 错误对象
+   * @param {Record<string, unknown>} [context] - 错误上下文
    */
-  public handleSessionError(error: any, context?: Record<string, any>): void {
+  public handleSessionError(error: unknown, context?: Record<string, unknown>): void {
     this.captureError('session', 'Session error occurred', error, context, 'warn')
   }
 
   /**
    * 处理行为错误
-   * @param {any} error - 错误对象
-   * @param {Record<string, any>} [context] - 错误上下文
+   * @param {unknown} error - 错误对象
+   * @param {Record<string, unknown>} [context] - 错误上下文
    */
-  public handleBehaviorError(error: any, context?: Record<string, any>): void {
+  public handleBehaviorError(error: unknown, context?: Record<string, unknown>): void {
     this.captureError('behavior', 'Behavior error occurred', error, context, 'warn')
   }
 
   /**
    * 处理数据错误
-   * @param {any} error - 错误对象
-   * @param {Record<string, any>} [context] - 错误上下文
+   * @param {unknown} error - 错误对象
+   * @param {Record<string, unknown>} [context] - 错误上下文
    */
-  public handleDataError(error: any, context?: Record<string, any>): void {
+  public handleDataError(error: unknown, context?: Record<string, unknown>): void {
     this.captureError('data', 'Data processing error occurred', error, context)
   }
 
   /**
    * 处理未知错误
-   * @param {any} error - 错误对象
-   * @param {Record<string, any>} [context] - 错误上下文
+   * @param {unknown} error - 错误对象
+   * @param {Record<string, unknown>} [context] - 错误上下文
    */
-  public handleUnknownError(error: any, context?: Record<string, any>): void {
+  public handleUnknownError(error: unknown, context?: Record<string, unknown>): void {
     this.captureError('unknown', 'Unknown error occurred', error, context)
   }
 }
@@ -678,15 +681,15 @@ export const errorHandler = new ErrorHandler()
  * 记录错误
  * @param {ErrorType} type - 错误类型
  * @param {string} message - 错误消息
- * @param {any} [error] - 原始错误对象
- * @param {Record<string, any>} [context] - 错误上下文
+ * @param {unknown} [error] - 原始错误对象
+ * @param {Record<string, unknown>} [context] - 错误上下文
  * @param {ErrorLevel} [level=error] - 错误级别
  */
 export function captureError(
   type: ErrorType,
   message: string,
-  error?: any,
-  context?: Record<string, any>,
+  error?: unknown,
+  context?: Record<string, unknown>,
   level: ErrorLevel = 'error'
 ): void {
   errorHandler.captureError(type, message, error, context, level)
@@ -694,90 +697,90 @@ export function captureError(
 
 /**
  * 处理网络错误
- * @param {any} error - 错误对象
- * @param {Record<string, any>} [context] - 错误上下文
+ * @param {unknown} error - 错误对象
+ * @param {Record<string, unknown>} [context] - 错误上下文
  */
-export function handleNetworkError(error: any, context?: Record<string, any>): void {
+export function handleNetworkError(error: unknown, context?: Record<string, unknown>): void {
   errorHandler.handleNetworkError(error, context)
 }
 
 /**
  * 处理存储错误
- * @param {any} error - 错误对象
- * @param {Record<string, any>} [context] - 错误上下文
+ * @param {unknown} error - 错误对象
+ * @param {Record<string, unknown>} [context] - 错误上下文
  */
-export function handleStorageError(error: any, context?: Record<string, any>): void {
+export function handleStorageError(error: unknown, context?: Record<string, unknown>): void {
   errorHandler.handleStorageError(error, context)
 }
 
 /**
  * 处理浏览器 API 错误
- * @param {any} error - 错误对象
- * @param {Record<string, any>} [context] - 错误上下文
+ * @param {unknown} error - 错误对象
+ * @param {Record<string, unknown>} [context] - 错误上下文
  */
-export function handleBrowserError(error: any, context?: Record<string, any>): void {
+export function handleBrowserError(error: unknown, context?: Record<string, unknown>): void {
   errorHandler.handleBrowserError(error, context)
 }
 
 /**
  * 处理插件错误
- * @param {any} error - 错误对象
- * @param {Record<string, any>} [context] - 错误上下文
+ * @param {unknown} error - 错误对象
+ * @param {Record<string, unknown>} [context] - 错误上下文
  */
-export function handlePluginError(error: any, context?: Record<string, any>): void {
+export function handlePluginError(error: unknown, context?: Record<string, unknown>): void {
   errorHandler.handlePluginError(error, context)
 }
 
 /**
  * 处理队列错误
- * @param {any} error - 错误对象
- * @param {Record<string, any>} [context] - 错误上下文
+ * @param {unknown} error - 错误对象
+ * @param {Record<string, unknown>} [context] - 错误上下文
  */
-export function handleQueueError(error: any, context?: Record<string, any>): void {
+export function handleQueueError(error: unknown, context?: Record<string, unknown>): void {
   errorHandler.handleQueueError(error, context)
 }
 
 /**
  * 处理设备 ID 错误
- * @param {any} error - 错误对象
- * @param {Record<string, any>} [context] - 错误上下文
+ * @param {unknown} error - 错误对象
+ * @param {Record<string, unknown>} [context] - 错误上下文
  */
-export function handleDeviceError(error: any, context?: Record<string, any>): void {
+export function handleDeviceError(error: unknown, context?: Record<string, unknown>): void {
   errorHandler.handleDeviceError(error, context)
 }
 
 /**
  * 处理会话错误
- * @param {any} error - 错误对象
- * @param {Record<string, any>} [context] - 错误上下文
+ * @param {unknown} error - 错误对象
+ * @param {Record<string, unknown>} [context] - 错误上下文
  */
-export function handleSessionError(error: any, context?: Record<string, any>): void {
+export function handleSessionError(error: unknown, context?: Record<string, unknown>): void {
   errorHandler.handleSessionError(error, context)
 }
 
 /**
  * 处理行为错误
- * @param {any} error - 错误对象
- * @param {Record<string, any>} [context] - 错误上下文
+ * @param {unknown} error - 错误对象
+ * @param {Record<string, unknown>} [context] - 错误上下文
  */
-export function handleBehaviorError(error: any, context?: Record<string, any>): void {
+export function handleBehaviorError(error: unknown, context?: Record<string, unknown>): void {
   errorHandler.handleBehaviorError(error, context)
 }
 
 /**
  * 处理数据错误
- * @param {any} error - 错误对象
- * @param {Record<string, any>} [context] - 错误上下文
+ * @param {unknown} error - 错误对象
+ * @param {Record<string, unknown>} [context] - 错误上下文
  */
-export function handleDataError(error: any, context?: Record<string, any>): void {
+export function handleDataError(error: unknown, context?: Record<string, unknown>): void {
   errorHandler.handleDataError(error, context)
 }
 
 /**
  * 处理未知错误
- * @param {any} error - 错误对象
- * @param {Record<string, any>} [context] - 错误上下文
+ * @param {unknown} error - 错误对象
+ * @param {Record<string, unknown>} [context] - 错误上下文
  */
-export function handleUnknownError(error: any, context?: Record<string, any>): void {
+export function handleUnknownError(error: unknown, context?: Record<string, unknown>): void {
   errorHandler.handleUnknownError(error, context)
 }

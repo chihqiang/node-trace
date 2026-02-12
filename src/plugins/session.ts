@@ -87,7 +87,7 @@ class Sessions {
   /**
    * 内存缓存
    */
-  private storageCache: Record<string, string> = {};
+  private storageCache: Record<string, string | null> = {};
   /**
    * 上次存储同步时间
    */
@@ -318,9 +318,11 @@ class Sessions {
 
     // 如果内存缓存中没有，从存储中读取
     if (!sessionId || !startTimeStr || !lastActiveStr) {
-      sessionId = storageUtils.get(SESSION_ID_KEY);
-      startTimeStr = storageUtils.get(SESSION_START_KEY);
-      lastActiveStr = storageUtils.get(SESSION_LAST_ACTIVE_KEY);
+      sessionId = storageUtils.get(SESSION_ID_KEY) as string | null;
+      startTimeStr = storageUtils.get(SESSION_START_KEY) as string | null;
+      lastActiveStr = storageUtils.get(SESSION_LAST_ACTIVE_KEY) as
+        | string
+        | null;
 
       // 更新内存缓存
       if (sessionId) this.storageCache[SESSION_ID_KEY] = sessionId;

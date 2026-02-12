@@ -9,6 +9,13 @@ import { storageUtils } from "./browser";
 import type { IPlugin, EventProperties, Payload } from "../types";
 
 /**
+ * 扩展的 Navigator 接口
+ */
+interface ExtendedNavigator extends Navigator {
+  deviceMemory?: number;
+}
+
+/**
  * 设备ID存储键
  */
 const DEVICE_ID_KEY = "__analytics_device_id__";
@@ -202,7 +209,7 @@ export function getDeviceId(): string {
     return generateStableDeviceId();
   }
 
-  const existingId = storageUtils.get(DEVICE_ID_KEY);
+  const existingId = storageUtils.get(DEVICE_ID_KEY) as string | null;
   if (existingId) {
     return existingId;
   }
@@ -245,7 +252,7 @@ export function getID(): string {
     return getDeviceId();
   }
 
-  const userId = storageUtils.get(USER_ID_KEY);
+  const userId = storageUtils.get(USER_ID_KEY) as string | null;
   if (userId) {
     return userId;
   }

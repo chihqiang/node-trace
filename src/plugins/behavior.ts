@@ -123,10 +123,10 @@ class Behaviors {
    * @returns {BehaviorStep[]} 行为路径
    */
   private loadBehaviorPath(): BehaviorStep[] {
-    const pathStr = storageUtils.get(BEHAVIOR_PATH_KEY);
+    const pathStr = storageUtils.get(BEHAVIOR_PATH_KEY) as string | null;
     if (!pathStr) return [];
     try {
-      const path = JSON.parse(pathStr);
+      const path = JSON.parse(pathStr) as unknown;
       return Array.isArray(path) ? path : [];
     } catch {
       return [];

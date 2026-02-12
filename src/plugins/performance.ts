@@ -8,6 +8,16 @@ import type { IPlugin, IPluginContext } from "../types";
 import { isBrowser } from "../utils";
 
 /**
+ * 性能绘制条目接口
+ */
+interface PerformancePaintEntry {
+  name: string;
+  startTime: number;
+  duration: number;
+  entryType: string;
+}
+
+/**
  * 发送性能数据
  */
 function sendPerformanceData() {
@@ -37,19 +47,22 @@ function sendPerformanceData() {
         // TCP 连接时间
         tcpTime: navEntry.connectEnd - navEntry.connectStart,
         // SSL 握手时间
-        sslTime: (navEntry as any).secureConnectionStart
-          ? navEntry.connectEnd - (navEntry as any).secureConnectionStart
+        sslTime: navEntry.secureConnectionStart
+          ? navEntry.connectEnd - navEntry.secureConnectionStart
           : 0,
         // 首屏时间（估算）
         firstPaint:
-          (performance as any)
+          performance
             .getEntriesByType("paint")
-            .find((e: any) => e.name === "first-paint")?.startTime || 0,
+            .find((e) => (e as PerformancePaintEntry).name === "first-paint")
+            ?.startTime || 0,
         firstContentfulPaint:
-          (performance as any)
+          performance
             .getEntriesByType("paint")
-            .find((e: any) => e.name === "first-contentful-paint")?.startTime ||
-          0,
+            .find(
+              (e) =>
+                (e as PerformancePaintEntry).name === "first-contentful-paint",
+            )?.startTime || 0,
       });
     }
 

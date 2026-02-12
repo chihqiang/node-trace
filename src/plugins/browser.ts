@@ -69,6 +69,17 @@ interface DeviceDetectionResult {
 }
 
 /**
+ * 网络连接接口
+ */
+interface NetworkConnection {
+  type?: string;
+  downlink?: number;
+  effectiveType?: string;
+  rtt?: number;
+  saveData?: boolean;
+}
+
+/**
  * 浏览器数据接口
  */
 export interface BrowserData {
@@ -406,7 +417,7 @@ function getBasicBrowserInfo(): {
     app_name: navigator.appName,
     language: navigator.language,
     platform: navigator.platform,
-    browser_version: (navigator as any).appVersion,
+    browser_version: navigator.appVersion,
     user_agent: navigator.userAgent,
   };
 }
@@ -489,10 +500,15 @@ function getNetworkInfo(): {
 
   return {
     is_online: navigator.onLine,
-    connection_type: (navigator as any).connection?.type || "unknown",
-    downlink: (navigator as any).connection?.downlink,
-    effective_type: (navigator as any).connection?.effectiveType,
-    rtt: (navigator as any).connection?.rtt,
+    connection_type:
+      (navigator as unknown as { connection?: NetworkConnection }).connection
+        ?.type || "unknown",
+    downlink: (navigator as unknown as { connection?: NetworkConnection })
+      .connection?.downlink,
+    effective_type: (navigator as unknown as { connection?: NetworkConnection })
+      .connection?.effectiveType,
+    rtt: (navigator as unknown as { connection?: NetworkConnection }).connection
+      ?.rtt,
   };
 }
 
@@ -683,10 +699,14 @@ export const browserUtils = {
     let downlink = 0;
 
     if ("connection" in navigator) {
-      const connection = navigator.connection as any;
-      effectiveType = connection.effectiveType || "unknown";
-      rtt = connection.rtt || 0;
-      downlink = connection.downlink || 0;
+      const connection = (
+        navigator as unknown as { connection?: NetworkConnection }
+      ).connection;
+      effectiveType =
+        (connection?.effectiveType as "2g" | "3g" | "4g" | "5g" | "unknown") ||
+        "unknown";
+      rtt = connection?.rtt || 0;
+      downlink = connection?.downlink || 0;
     }
 
     return {
@@ -706,9 +726,9 @@ export const storageUtils = {
    * 安全获取本地存储
    * @param {string} key - 存储键
    * @param {Function} [parser] - 解析函数
-   * @returns {any} 存储值
+   * @returns {unknown} 存储值
    */
-  get: (key: string, parser?: (value: string) => any): any => {
+  get: (key: string, parser?: (value: string) => unknown): unknown => {
     if (!isBrowser() || typeof localStorage === "undefined") {
       return null;
     }
@@ -724,10 +744,10 @@ export const storageUtils = {
   /**
    * 安全设置本地存储
    * @param {string} key - 存储键
-   * @param {any} value - 存储值
+   * @param {unknown} value - 存储值
    * @returns {boolean} 是否设置成功
    */
-  set: (key: string, value: any): boolean => {
+  set: (key: string, value: unknown): boolean => {
     if (!isBrowser() || typeof localStorage === "undefined") {
       return false;
     }
@@ -860,16 +880,22 @@ export function getBrowserData(): BrowserData {
       device_width: window?.innerWidth || 0,
       device_height: window?.innerHeight || 0,
       is_online: navigator?.onLine || false,
-      connection_type: (navigator as any)?.connection?.type || "unknown",
-      downlink: (navigator as any)?.connection?.downlink,
-      effective_type: (navigator as any)?.connection?.effectiveType,
-      rtt: (navigator as any)?.connection?.rtt,
+      connection_type:
+        (navigator as unknown as { connection?: NetworkConnection })?.connection
+          ?.type || "unknown",
+      downlink: (navigator as unknown as { connection?: NetworkConnection })
+        ?.connection?.downlink,
+      effective_type: (
+        navigator as unknown as { connection?: NetworkConnection }
+      )?.connection?.effectiveType,
+      rtt: (navigator as unknown as { connection?: NetworkConnection })
+        ?.connection?.rtt,
       app_code_name: navigator?.appCodeName || "",
       app_name: navigator?.appName || "",
       language: navigator?.language || "",
       platform: navigator?.platform || "",
       time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      browser_version: (navigator as any)?.appVersion,
+      browser_version: navigator?.appVersion,
       device_pixel_ratio: window?.devicePixelRatio || 1,
       is_mobile: false,
       is_tablet: false,
