@@ -365,22 +365,22 @@ declare function clearTimers(): void;
 
 /**
  * 异步版本的设备ID生成
- * @returns {Promise<string>} 设备ID
+ * @returns 设备ID
  */
 declare function generateStableDeviceIdAsync(): Promise<string>;
 /**
  * 获取设备ID
- * @returns {string} 设备ID
+ * @returns 设备ID
  */
 declare function getDeviceId(): string;
 /**
  * 设置用户ID
- * @param {string} id - 用户ID
+ * @param id - 用户ID
  */
 declare function setID(id: string): void;
 /**
  * 获取用户ID
- * @returns {string} 用户ID
+ * @returns 用户ID
  */
 declare function getID(): string;
 /**
