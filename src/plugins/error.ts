@@ -19,7 +19,7 @@ export const errorPlugin: IPlugin = {
   /**
    * 插件设置方法
    */
-  setup(context: IPluginContext) {
+  setup(_context: IPluginContext) {
     if (!isBrowser()) return;
 
     // 监听JavaScript错误

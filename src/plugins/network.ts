@@ -215,7 +215,7 @@ export const networkPlugin: IPlugin = {
   /**
    * 插件设置方法
    */
-  setup(context: IPluginContext) {
+  setup(_context: IPluginContext) {
     if (!isBrowser()) return;
 
     // 补丁 XMLHttpRequest

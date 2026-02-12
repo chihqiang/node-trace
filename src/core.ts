@@ -3,11 +3,11 @@
  * 包含初始化、事件跟踪、插件管理等核心功能
  */
 
-import { push, startOfflineCheckTimer, clearTimers } from './queue'
+import { push, startOfflineCheckTimer } from './queue'
 import { queueManager } from './queue/manager'
 import { now, stringUtils } from './utils'
 import { handlePluginError } from './error'
-import type { Options, Payload, IPlugin, IPluginContext, EventProperties, PluginLifecycle } from './types'
+import type { Options, Payload, IPlugin, IPluginContext, EventProperties } from './types'
 
 /**
  * 默认配置常量

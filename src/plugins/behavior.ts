@@ -460,7 +460,7 @@ export const behaviorPlugin: IPlugin = {
     }
   },
 
-  init(context: IPluginContext): void {
+  init(_context: IPluginContext): void {
     behaviors.init();
   },
 

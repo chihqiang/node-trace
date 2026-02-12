@@ -1,6 +1,6 @@
 import { isBrowser } from "../utils";
 import { QUEUE_CONSTANTS } from "./constants";
-import { networkManager, type NetworkType } from "./network";
+import { networkManager } from "./network";
 
 /**
  * 发送策略类型
@@ -33,11 +33,11 @@ export interface SendOptions {
 export class SendStrategySelector {
   /**
    * 选择发送策略
-   * @param body - 已序列化的数据
+   * @param _body - 已序列化的数据（保留用于未来扩展）
    * @param bodySize - 数据大小
    * @returns 发送策略
    */
-  select(body: string, bodySize: number): SendStrategy {
+  select(_body: string, bodySize: number): SendStrategy {
     const networkType = networkManager.getType();
 
     if (networkType === "offline") {

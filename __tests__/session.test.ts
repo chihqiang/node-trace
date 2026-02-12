@@ -1,8 +1,6 @@
 // @jest-environment jsdom
 
-import { sessionPlugin } from '../src/plugins/session'
 import { sessions as sessionManager } from '../src/plugins/session'
-import { isBrowser } from '../src/utils';
 
 // 模拟 localStorage
 const mockLocalStorage: Record<string, string> = {};

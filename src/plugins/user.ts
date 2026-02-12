@@ -9,13 +9,6 @@ import { storageUtils } from "./browser";
 import type { IPlugin, EventProperties, Payload } from "../types";
 
 /**
- * 扩展的 Navigator 接口
- */
-interface ExtendedNavigator extends Navigator {
-  deviceMemory?: number;
-}
-
-/**
  * 设备ID存储键
  */
 const DEVICE_ID_KEY = "__analytics_device_id__";

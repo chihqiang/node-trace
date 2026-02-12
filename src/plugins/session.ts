@@ -400,7 +400,7 @@ export const sessionPlugin: IPlugin = {
   /**
    * 初始化插件
    */
-  init(context: IPluginContext): void {
+  init(_context: IPluginContext): void {
     sessions.start();
   },
 

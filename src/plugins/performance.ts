@@ -115,7 +115,7 @@ export const performancePlugin: IPlugin = {
   /**
    * 插件设置方法
    */
-  setup(context: IPluginContext) {
+  setup(_context: IPluginContext) {
     if (!isBrowser()) return;
 
     // 等待页面加载完成

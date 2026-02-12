@@ -1,9 +1,6 @@
 // @jest-environment jsdom
 
-// 先导入 isBrowser 并模拟它
-import { isBrowser } from '../src/utils';
-
-// 模拟 isBrowser 返回 true
+// 模拟 utils 模块
 jest.mock('../src/utils', () => ({
   ...jest.requireActual('../src/utils'),
   isBrowser: jest.fn(() => true),

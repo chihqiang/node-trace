@@ -23,7 +23,8 @@
     "test:coverage": "jest --coverage",
     "format": "prettier --write src/**/*.ts",
     "dev": "tsup --watch",
-    "prepublishOnly": "run-s format test build"
+    "lint": "npx tsc --noEmit",
+    "prepublishOnly": "run-s format lint test build"
   },
   "keywords": [
     "event-tracking",
