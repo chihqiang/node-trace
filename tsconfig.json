@@ -22,9 +22,7 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "isolatedModules": false,
-    "allowImportingTsExtensions": false,
-    "outDir": "./dist",
-    "rootDir": "./src"
+    "allowImportingTsExtensions": false
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
