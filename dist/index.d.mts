@@ -392,241 +392,71 @@ declare function clearID(): void;
  */
 declare const userPlugin: IPlugin;
 
-/**
- * 浏览器信息插件
- * 负责获取浏览器数据、设备信息和存储操作
- */
+declare const storageUtils: {
+    get: (key: string, parser?: (value: string) => unknown) => unknown;
+    set: (key: string, value: unknown) => boolean;
+    remove: (key: string) => boolean;
+    clear: () => boolean;
+};
 
-/**
- * 浏览器数据接口
- */
 interface BrowserData {
-    /**
-     * 设备ID
-     */
     device_id: string;
-    /**
-     * 事件名称
-     */
     event: string;
-    /**
-     * 用户代理字符串
-     */
     user_agent: string;
-    /**
-     * 设备宽度
-     */
     device_width: number;
-    /**
-     * 设备高度
-     */
     device_height: number;
-    /**
-     * 是否在线
-     */
     is_online: boolean;
-    /**
-     * 连接类型
-     */
     connection_type?: string;
-    /**
-     * 下行速度
-     */
     downlink?: number;
-    /**
-     * 有效连接类型
-     */
     effective_type?: string;
-    /**
-     * 往返时间
-     */
     rtt?: number;
-    /**
-     * 应用代码名称
-     */
     app_code_name: string;
-    /**
-     * 应用名称
-     */
     app_name: string;
-    /**
-     * 语言
-     */
     language: string;
-    /**
-     * 平台
-     */
     platform: string;
-    /**
-     * 时区
-     */
     time_zone: string;
-    /**
-     * 浏览器版本
-     */
     browser_version?: string;
-    /**
-     * 浏览器名称
-     */
     browser_name?: string;
-    /**
-     * 浏览器主版本
-     */
     browser_major_version?: string;
-    /**
-     * 引擎名称
-     */
     engine_name?: string;
-    /**
-     * 引擎版本
-     */
     engine_version?: string;
-    /**
-     * 设备像素比
-     */
     device_pixel_ratio: number;
-    /**
-     * 是否为移动设备
-     */
     is_mobile?: boolean;
-    /**
-     * 是否为平板设备
-     */
     is_tablet?: boolean;
-    /**
-     * 是否为桌面设备
-     */
     is_desktop?: boolean;
-    /**
-     * 当前URL
-     */
     current_url: string;
-    /**
-     * 路径名
-     */
     pathname: string;
-    /**
-     * 主机名
-     */
     hostname: string;
-    /**
-     * 协议
-     */
     protocol: string;
-    /**
-     * 端口
-     */
     port?: string;
-    /**
-     * 搜索参数
-     */
     search?: string;
-    /**
-     * 哈希
-     */
     hash?: string;
-    /**
-     * 文档URL
-     */
     document_url: string;
-    /**
-     * 来源URL
-     */
     referrer_url: string;
-    /**
-     * 内容类型
-     */
     content_type: string;
-    /**
-     * 文档标题
-     */
     document_title: string;
-    /**
-     * 文档字符集
-     */
     document_charset: string;
-    /**
-     * 文档就绪状态
-     */
     document_ready_state?: string;
-    /**
-     * 屏幕宽度
-     */
     screen_width: number;
-    /**
-     * 屏幕高度
-     */
     screen_height: number;
-    /**
-     * 可用屏幕宽度
-     */
     screen_available_width: number;
-    /**
-     * 可用屏幕高度
-     */
     screen_available_height: number;
-    /**
-     * 屏幕颜色深度
-     */
     screen_color_depth: number;
-    /**
-     * 滚动X坐标
-     */
     scroll_x: number;
-    /**
-     * 滚动Y坐标
-     */
     scroll_y: number;
-    /**
-     * 国家
-     */
     country?: string;
-    /**
-     * 地区
-     */
     region?: string;
-    /**
-     * 城市
-     */
     city?: string;
-    /**
-     * 开始时间
-     */
     begin_time: number;
-    /**
-     * 其他属性
-     */
     [propName: string]: unknown;
 }
-/**
- * 浏览器工具函数
- */
 declare const browserUtils: {
-    /**
-     * 检测浏览器类型
-     * @returns {Object} 浏览器信息
-     * @returns {string} name - 浏览器名称
-     * @returns {string} version - 浏览器版本
-     * @returns {string} platform - 平台
-     */
     getBrowser: () => {
         name: string;
         version: string;
         platform: string;
     };
-    /**
-     * 检测设备类型
-     * @returns {('mobile'|'tablet'|'desktop'|'unknown')} 设备类型
-     */
     getDeviceType: () => "mobile" | "tablet" | "desktop" | "unknown";
-    /**
-     * 检测网络状态
-     * @returns {Object} 网络状态
-     * @returns {('online'|'offline')} type - 网络类型
-     * @returns {('2g'|'3g'|'4g'|'5g'|'unknown')} effectiveType - 有效网络类型
-     * @returns {number} rtt - 往返时间
-     * @returns {number} downlink - 下行速度
-     */
     getNetworkState: () => {
         type: "online" | "offline";
         effectiveType: "2g" | "3g" | "4g" | "5g" | "unknown";
@@ -634,44 +464,7 @@ declare const browserUtils: {
         downlink: number;
     };
 };
-/**
- * 存储工具函数
- */
-declare const storageUtils: {
-    /**
-     * 安全获取本地存储
-     * @param {string} key - 存储键
-     * @param {Function} [parser] - 解析函数
-     * @returns {unknown} 存储值
-     */
-    get: (key: string, parser?: (value: string) => unknown) => unknown;
-    /**
-     * 安全设置本地存储
-     * @param {string} key - 存储键
-     * @param {unknown} value - 存储值
-     * @returns {boolean} 是否设置成功
-     */
-    set: (key: string, value: unknown) => boolean;
-    /**
-     * 安全移除本地存储
-     * @param {string} key - 存储键
-     * @returns {boolean} 是否移除成功
-     */
-    remove: (key: string) => boolean;
-    /**
-     * 安全清空本地存储
-     * @returns {boolean} 是否清空成功
-     */
-    clear: () => boolean;
-};
-/**
- * 获取浏览器数据
- * @returns {BrowserData} 浏览器数据
- */
 declare function getBrowserData(): BrowserData;
-/**
- * 浏览器插件
- */
 declare const browserPlugin: IPlugin;
 
 /**

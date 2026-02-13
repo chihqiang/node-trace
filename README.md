@@ -865,10 +865,6 @@ interface BrowserData {
 }
 ```
 
-## 参考文档
-
-- **服务端设计方案**: [server.md](server.md) - 详细的服务端架构和功能设计方案
-
 ## 许可证
 
 Apache-2.0 License
