@@ -782,4 +782,419 @@ declare const pageviewPlugin: IPlugin;
  */
 declare const networkPlugin: IPlugin;
 
-export { type BrowserData, type EventProperties, type IPlugin, type Options, type Payload, behaviorPlugin, behaviors, browserPlugin, browserUtils, clearID, clearTimers, errorPlugin, flush, generateStableDeviceIdAsync, getBrowserData, getDeviceId, getID, init, networkPlugin, pageviewPlugin, performancePlugin, plugins, sessionPlugin, sessions, setID, storageUtils, track, use, userPlugin };
+/**
+ * 错误类型定义
+ */
+/**
+ * 错误类型
+ */
+type ErrorType = "network" | "network:timeout" | "network:offline" | "network:server" | "network:client" | "storage" | "storage:quota" | "storage:access" | "browser" | "plugin" | "plugin:init" | "plugin:execute" | "queue" | "queue:full" | "queue:overflow" | "device" | "session" | "session:timeout" | "behavior" | "data" | "data:validation" | "data:serialization" | "config" | "init" | "runtime" | "unknown";
+/**
+ * 错误级别
+ */
+type ErrorLevel = "debug" | "info" | "warn" | "error" | "fatal";
+/**
+ * 错误接口
+ */
+interface TraceError {
+    /**
+     * 错误类型
+     */
+    type: ErrorType;
+    /**
+     * 错误级别
+     */
+    level: ErrorLevel;
+    /**
+     * 错误消息
+     */
+    message: string;
+    /**
+     * 错误代码
+     */
+    code?: string;
+    /**
+     * 错误堆栈
+     */
+    stack?: string;
+    /**
+     * 错误上下文
+     */
+    context?: Record<string, unknown>;
+    /**
+     * 错误详情
+     */
+    details?: Record<string, unknown>;
+    /**
+     * 错误来源
+     */
+    source?: string;
+    /**
+     * 错误发生的文件
+     */
+    file?: string;
+    /**
+     * 错误发生的行号
+     */
+    line?: number;
+    /**
+     * 时间戳
+     */
+    timestamp: number;
+    /**
+     * 错误ID
+     */
+    id: string;
+    /**
+     * 相关事件
+     */
+    event?: string;
+    /**
+     * 用户ID
+     */
+    userId?: string;
+    /**
+     * 设备ID
+     */
+    deviceId?: string;
+}
+/**
+ * 错误处理配置
+ */
+interface ErrorHandlerConfig {
+    /**
+     * 是否捕获错误
+     */
+    capture: boolean;
+    /**
+     * 日志级别
+     */
+    logLevel: ErrorLevel;
+    /**
+     * 最大错误数量
+     */
+    maxErrors: number;
+}
+/**
+ * 错误统计接口
+ */
+interface ErrorStats {
+    total: number;
+    byType: Record<ErrorType, number>;
+    byLevel: Record<ErrorLevel, number>;
+    byCode: Record<string, number>;
+    lastError: number;
+    rate: {
+        lastMinute: number;
+        lastHour: number;
+    };
+    consecutiveErrors: number;
+    maxConsecutiveErrors: number;
+}
+/**
+ * 错误摘要接口
+ */
+interface ErrorSummary {
+    total: number;
+    lastError: TraceError | null;
+    mostFrequentType: ErrorType | null;
+    mostFrequentLevel: ErrorLevel | null;
+    rate: {
+        lastMinute: number;
+        lastHour: number;
+    };
+}
+
+/**
+ * 错误处理类
+ * 负责捕获、记录和处理错误
+ */
+declare class ErrorHandler {
+    /**
+     * 配置
+     * @private
+     */
+    private config;
+    /**
+     * 错误队列
+     * @private
+     */
+    private errors;
+    /**
+     * 错误统计
+     * @private
+     */
+    private stats;
+    /**
+     * 错误时间戳列表
+     * @private
+     */
+    private errorTimestamps;
+    /**
+     * 构造函数
+     * @param {Partial<ErrorHandlerConfig>} [config] - 配置选项
+     */
+    constructor(config?: Partial<ErrorHandlerConfig>);
+    /**
+     * 初始化错误统计
+     * @private
+     */
+    private initStats;
+    /**
+     * 生成错误ID
+     * @private
+     * @returns {string} 错误ID
+     */
+    private generateErrorId;
+    /**
+     * 解析错误堆栈
+     * @private
+     * @param {string} stack - 错误堆栈
+     * @returns {Object} 解析结果
+     */
+    private parseStack;
+    /**
+     * 更新错误统计
+     * @private
+     * @param {TraceError} error - 错误对象
+     */
+    private updateStats;
+    /**
+     * 记录错误
+     * @param {ErrorType} type - 错误类型
+     * @param {string} message - 错误消息
+     * @param {unknown} [error] - 原始错误对象
+     * @param {Record<string, unknown>} [context] - 错误上下文
+     * @param {ErrorLevel} [level=error] - 错误级别
+     * @param {string} [code] - 错误代码
+     * @param {string} [source] - 错误来源
+     */
+    captureError(type: ErrorType, message: string, error?: unknown, context?: Record<string, unknown>, level?: ErrorLevel, code?: string, source?: string): TraceError;
+    /**
+     * 检查错误率
+     * @private
+     * @param {TraceError} error - 错误对象
+     */
+    private checkErrorRate;
+    /**
+     * 记录错误日志
+     * @private
+     * @param {TraceError} error - 错误对象
+     */
+    private logError;
+    /**
+     * 获取错误统计
+     * @returns {ErrorStats} 错误统计信息
+     */
+    getStats(): ErrorStats;
+    /**
+     * 获取最近的错误
+     * @param {number} [count=10] - 错误数量
+     * @returns {TraceError[]} 最近的错误列表
+     */
+    getRecentErrors(count?: number): TraceError[];
+    /**
+     * 检查是否有错误
+     * @returns {boolean} 是否有错误
+     */
+    hasErrors(): boolean;
+    /**
+     * 获取错误摘要
+     * @returns {ErrorSummary} 错误摘要
+     */
+    getErrorSummary(): {
+        total: number;
+        lastError: TraceError | null;
+        mostFrequentType: ErrorType | null;
+        mostFrequentLevel: ErrorLevel | null;
+        rate: {
+            lastMinute: number;
+            lastHour: number;
+        };
+    };
+    /**
+     * 检查是否应该记录该级别的错误
+     * @private
+     * @param {ErrorLevel} level - 错误级别
+     * @returns {boolean} 是否应该记录
+     */
+    private shouldLog;
+    /**
+     * 获取错误队列
+     * @returns {TraceError[]} 错误队列
+     */
+    getErrors(): TraceError[];
+    /**
+     * 清空错误队列
+     */
+    clearErrors(): void;
+    /**
+     * 处理网络错误
+     * @param {unknown} error - 错误对象
+     * @param {Record<string, unknown>} [context] - 错误上下文
+     */
+    handleNetworkError(error: unknown, context?: Record<string, unknown>): void;
+    /**
+     * 处理存储错误
+     * @param {unknown} error - 错误对象
+     * @param {Record<string, unknown>} [context] - 错误上下文
+     */
+    handleStorageError(error: unknown, context?: Record<string, unknown>): void;
+    /**
+     * 处理浏览器 API 错误
+     * @param {unknown} error - 错误对象
+     * @param {Record<string, unknown>} [context] - 错误上下文
+     */
+    handleBrowserError(error: unknown, context?: Record<string, unknown>): void;
+    /**
+     * 处理插件错误
+     * @param {unknown} error - 错误对象
+     * @param {Record<string, unknown>} [context] - 错误上下文
+     */
+    handlePluginError(error: unknown, context?: Record<string, unknown>): void;
+    /**
+     * 处理队列错误
+     * @param {unknown} error - 错误对象
+     * @param {Record<string, unknown>} [context] - 错误上下文
+     */
+    handleQueueError(error: unknown, context?: Record<string, unknown>): void;
+    /**
+     * 处理设备 ID 错误
+     * @param {unknown} error - 错误对象
+     * @param {Record<string, unknown>} [context] - 错误上下文
+     */
+    handleDeviceError(error: unknown, context?: Record<string, unknown>): void;
+    /**
+     * 处理会话错误
+     * @param {unknown} error - 错误对象
+     * @param {Record<string, unknown>} [context] - 错误上下文
+     */
+    handleSessionError(error: unknown, context?: Record<string, unknown>): void;
+    /**
+     * 处理行为错误
+     * @param {unknown} error - 错误对象
+     * @param {Record<string, unknown>} [context] - 错误上下文
+     */
+    handleBehaviorError(error: unknown, context?: Record<string, unknown>): void;
+    /**
+     * 处理数据错误
+     * @param {unknown} error - 错误对象
+     * @param {Record<string, unknown>} [context] - 错误上下文
+     */
+    handleDataError(error: unknown, context?: Record<string, unknown>): void;
+    /**
+     * 处理未知错误
+     * @param {unknown} error - 错误对象
+     * @param {Record<string, unknown>} [context] - 错误上下文
+     */
+    handleUnknownError(error: unknown, context?: Record<string, unknown>): void;
+}
+
+/**
+ * 错误统计模块
+ */
+
+/**
+ * 初始化错误统计
+ * @returns {ErrorStats} 初始化后的错误统计对象
+ */
+declare function initializeStats(): ErrorStats;
+/**
+ * 计算错误率
+ * @param {number[]} timestamps - 错误时间戳列表
+ * @returns {Object} 错误率对象
+ */
+declare function calculateErrorRate(timestamps: number[]): {
+    lastMinute: number;
+    lastHour: number;
+};
+/**
+ * 生成错误摘要
+ * @param {TraceError[]} errors - 错误列表
+ * @param {ErrorStats} stats - 错误统计
+ * @returns {ErrorSummary} 错误摘要
+ */
+declare function generateErrorSummary(errors: TraceError[], stats: ErrorStats): ErrorSummary;
+/**
+ * 清理过期的时间戳
+ * @param {number[]} timestamps - 时间戳列表
+ * @param {number} threshold - 阈值时间戳
+ * @returns {number[]} 清理后的时间戳列表
+ */
+declare function cleanupTimestamps(timestamps: number[], threshold: number): number[];
+
+/**
+ * 错误处理器实例
+ */
+declare const errorHandler: ErrorHandler;
+/**
+ * 记录错误
+ * @param {import('./types').ErrorType} type - 错误类型
+ * @param {string} message - 错误消息
+ * @param {unknown} [error] - 原始错误对象
+ * @param {Record<string, unknown>} [context] - 错误上下文
+ * @param {import('./types').ErrorLevel} [level=error] - 错误级别
+ */
+declare function captureError(type: ErrorType, message: string, error?: unknown, context?: Record<string, unknown>, level?: ErrorLevel): void;
+/**
+ * 处理网络错误
+ * @param {unknown} error - 错误对象
+ * @param {Record<string, unknown>} [context] - 错误上下文
+ */
+declare function handleNetworkError(error: unknown, context?: Record<string, unknown>): void;
+/**
+ * 处理存储错误
+ * @param {unknown} error - 错误对象
+ * @param {Record<string, unknown>} [context] - 错误上下文
+ */
+declare function handleStorageError(error: unknown, context?: Record<string, unknown>): void;
+/**
+ * 处理浏览器 API 错误
+ * @param {unknown} error - 错误对象
+ * @param {Record<string, unknown>} [context] - 错误上下文
+ */
+declare function handleBrowserError(error: unknown, context?: Record<string, unknown>): void;
+/**
+ * 处理插件错误
+ * @param {unknown} error - 错误对象
+ * @param {Record<string, unknown>} [context] - 错误上下文
+ */
+declare function handlePluginError(error: unknown, context?: Record<string, unknown>): void;
+/**
+ * 处理队列错误
+ * @param {unknown} error - 错误对象
+ * @param {Record<string, unknown>} [context] - 错误上下文
+ */
+declare function handleQueueError(error: unknown, context?: Record<string, unknown>): void;
+/**
+ * 处理设备 ID 错误
+ * @param {unknown} error - 错误对象
+ * @param {Record<string, unknown>} [context] - 错误上下文
+ */
+declare function handleDeviceError(error: unknown, context?: Record<string, unknown>): void;
+/**
+ * 处理会话错误
+ * @param {unknown} error - 错误对象
+ * @param {Record<string, unknown>} [context] - 错误上下文
+ */
+declare function handleSessionError(error: unknown, context?: Record<string, unknown>): void;
+/**
+ * 处理行为错误
+ * @param {unknown} error - 错误对象
+ * @param {Record<string, unknown>} [context] - 错误上下文
+ */
+declare function handleBehaviorError(error: unknown, context?: Record<string, unknown>): void;
+/**
+ * 处理数据错误
+ * @param {unknown} error - 错误对象
+ * @param {Record<string, unknown>} [context] - 错误上下文
+ */
+declare function handleDataError(error: unknown, context?: Record<string, unknown>): void;
+/**
+ * 处理未知错误
+ * @param {unknown} error - 错误对象
+ * @param {Record<string, unknown>} [context] - 错误上下文
+ */
+declare function handleUnknownError(error: unknown, context?: Record<string, unknown>): void;
+
+export { type BrowserData, ErrorHandler, type ErrorHandlerConfig, type ErrorLevel, type ErrorStats, type ErrorSummary, type ErrorType, type EventProperties, type IPlugin, type Options, type Payload, type TraceError, behaviorPlugin, behaviors, browserPlugin, browserUtils, calculateErrorRate, captureError, cleanupTimestamps, clearID, clearTimers, errorHandler, errorPlugin, flush, generateErrorSummary, generateStableDeviceIdAsync, getBrowserData, getDeviceId, getID, handleBehaviorError, handleBrowserError, handleDataError, handleDeviceError, handleNetworkError, handlePluginError, handleQueueError, handleSessionError, handleStorageError, handleUnknownError, init, initializeStats, networkPlugin, pageviewPlugin, performancePlugin, plugins, sessionPlugin, sessions, setID, storageUtils, track, use, userPlugin };

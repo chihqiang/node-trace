@@ -9,3 +9,4 @@ export { sessions } from './plugins/session'
 export { behaviors } from './plugins/behavior'
 
 export * from './plugins'
+export * from './error'
