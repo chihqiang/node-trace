@@ -13,59 +13,120 @@ import { getPageInfo, getScrollInfo } from "./page";
 import { getScreenInfo } from "./screen";
 import { storageUtils } from "./storage";
 
+/**
+ * Browser data interface
+ * Contains various information collected from the browser environment
+ */
 export interface BrowserData {
+  /** Device ID */
   device_id: string;
+  /** Event name */
   event: string;
+  /** User agent string */
   user_agent: string;
+  /** Device width */
   device_width: number;
+  /** Device height */
   device_height: number;
+  /** Whether online */
   is_online: boolean;
+  /** Connection type */
   connection_type?: string;
+  /** Downlink speed */
   downlink?: number;
+  /** Effective connection type */
   effective_type?: string;
+  /** Round-trip time */
   rtt?: number;
+  /** Application code name */
   app_code_name: string;
+  /** Application name */
   app_name: string;
+  /** Language setting */
   language: string;
+  /** Platform information */
   platform: string;
+  /** Time zone */
   time_zone: string;
+  /** Browser version */
   browser_version?: string;
+  /** Browser name */
   browser_name?: string;
+  /** Browser major version */
   browser_major_version?: string;
+  /** Engine name */
   engine_name?: string;
+  /** Engine version */
   engine_version?: string;
+  /** Device pixel ratio */
   device_pixel_ratio: number;
+  /** Whether mobile device */
   is_mobile?: boolean;
+  /** Whether tablet device */
   is_tablet?: boolean;
+  /** Whether desktop device */
   is_desktop?: boolean;
+  /** Current URL */
   current_url: string;
+  /** Path name */
   pathname: string;
+  /** Host name */
   hostname: string;
+  /** Protocol */
   protocol: string;
+  /** Port */
   port?: string;
+  /** Query string */
   search?: string;
+  /** Hash value */
   hash?: string;
+  /** Document URL */
   document_url: string;
+  /** Referrer URL */
   referrer_url: string;
+  /** Content type */
   content_type: string;
+  /** Document title */
   document_title: string;
+  /** Document character set */
   document_charset: string;
+  /** Document ready state */
   document_ready_state?: string;
+  /** Screen width */
   screen_width: number;
+  /** Screen height */
   screen_height: number;
+  /** Screen available width */
   screen_available_width: number;
+  /** Screen available height */
   screen_available_height: number;
+  /** Screen color depth */
   screen_color_depth: number;
+  /** Horizontal scroll position */
   scroll_x: number;
+  /** Vertical scroll position */
   scroll_y: number;
+  /** Country */
   country?: string;
+  /** Region */
   region?: string;
+  /** City */
   city?: string;
+  /** Begin time */
   begin_time: number;
+  /** Dynamic properties */
   [propName: string]: unknown;
 }
 
+/**
+ * Browser utility object
+ * Provides utility methods to get browser and device related information
+ */
 export const browserUtils = {
+  /**
+   * Gets browser information
+   * @returns Browser name, version, and platform information
+   */
   getBrowser: (): {
     name: string;
     version: string;
@@ -87,6 +148,10 @@ export const browserUtils = {
     };
   },
 
+  /**
+   * Gets device type
+   * @returns Device type: mobile, tablet, desktop, or unknown
+   */
   getDeviceType: (): "mobile" | "tablet" | "desktop" | "unknown" => {
     if (!isBrowser() || typeof navigator === "undefined") {
       return "unknown";
@@ -96,9 +161,15 @@ export const browserUtils = {
     return result.type;
   },
 
+  /** Gets network state */
   getNetworkState: networkBrowserUtils.getNetworkState,
 };
 
+/**
+ * Gets browser data
+ * Collects and returns various information from the current browser environment
+ * @returns Browser data object
+ */
 export function getBrowserData(): BrowserData {
   if (!isBrowser()) {
     return {
@@ -224,12 +295,21 @@ export function getBrowserData(): BrowserData {
   }
 }
 
+/**
+ * Browser data collection plugin
+ * Automatically collects browser environment data during event tracking
+ */
 export const browserPlugin: IPlugin = {
   name: "browser",
   version: "1.0.0",
   description: "Browser data collection plugin",
   priority: 20,
 
+  /**
+   * Event tracking hook
+   * @param payload - Original event payload
+   * @returns Event payload with browser data added
+   */
   onTrack<T extends EventProperties>(payload: Payload<T>): Payload<T> {
     const browserData = getBrowserData();
     return {
@@ -238,6 +318,10 @@ export const browserPlugin: IPlugin = {
     };
   },
 
+  /**
+   * Gets plugin information
+   * @returns Plugin name, version, and description
+   */
   getInfo(): Record<string, unknown> {
     return {
       name: this.name,

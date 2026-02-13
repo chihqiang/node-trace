@@ -1,33 +1,66 @@
 import { isBrowser } from "../../utils";
 
+/**
+ * Basic browser information interface.
+ */
 export interface BrowserInfo {
+  /** Browser name */
   name: string;
+  /** Major version number */
   major: string;
+  /** Rendering engine name */
   engine: string;
+  /** Rendering engine version */
   engineVersion: string;
 }
 
+/**
+ * Device type information interface.
+ */
 export interface DeviceType {
+  /** Whether the device is mobile */
   isMobile: boolean;
+  /** Whether the device is a tablet */
   isTablet: boolean;
+  /** Whether the device is desktop */
   isDesktop: boolean;
 }
 
+/**
+ * Detailed browser detection result interface.
+ */
 export interface BrowserDetectionResult {
+  /** Browser name */
   name: string;
+  /** Full version string */
   version: string;
+  /** Major version number */
   major: string;
+  /** Rendering engine name */
   engine: string;
+  /** Rendering engine version */
   engineVersion: string;
 }
 
+/**
+ * Device detection result interface.
+ */
 export interface DeviceDetectionResult {
+  /** Whether the device is mobile */
   isMobile: boolean;
+  /** Whether the device is a tablet */
   isTablet: boolean;
+  /** Whether the device is desktop */
   isDesktop: boolean;
+  /** Device type category */
   type: "mobile" | "tablet" | "desktop" | "unknown";
 }
 
+/**
+ * Detects browser information from user agent string.
+ * @param userAgent - The user agent string to parse
+ * @returns Browser detection result with name, version, and engine info
+ */
 export function detectBrowser(userAgent: string): BrowserDetectionResult {
   let name = "unknown";
   let version = "0";
@@ -71,6 +104,11 @@ export function detectBrowser(userAgent: string): BrowserDetectionResult {
   return { name, version, major, engine, engineVersion };
 }
 
+/**
+ * Detects device type from user agent string.
+ * @param userAgent - The user agent string to parse
+ * @returns Device detection result with type information
+ */
 export function detectDevice(userAgent: string): DeviceDetectionResult {
   const isMobile =
     /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/.test(userAgent) &&
@@ -88,6 +126,11 @@ export function detectDevice(userAgent: string): DeviceDetectionResult {
   return { isMobile, isTablet, isDesktop, type };
 }
 
+/**
+ * Parses basic browser information from user agent string.
+ * @param userAgent - The user agent string to parse
+ * @returns Simplified browser information
+ */
 export function parseBrowserInfo(userAgent: string): BrowserInfo {
   const result = detectBrowser(userAgent);
   return {
@@ -98,6 +141,11 @@ export function parseBrowserInfo(userAgent: string): BrowserInfo {
   };
 }
 
+/**
+ * Parses device type from user agent string.
+ * @param userAgent - The user agent string to parse
+ * @returns Device type information
+ */
 export function parseDeviceType(userAgent: string): DeviceType {
   const result = detectDevice(userAgent);
   return {
@@ -107,6 +155,10 @@ export function parseDeviceType(userAgent: string): DeviceType {
   };
 }
 
+/**
+ * Gets basic browser information from the navigator object.
+ * @returns Basic browser information including app name, language, platform, etc.
+ */
 export function getBasicBrowserInfo(): {
   app_code_name: string;
   app_name: string;
@@ -136,6 +188,11 @@ export function getBasicBrowserInfo(): {
   };
 }
 
+/**
+ * Gets detailed browser information from user agent string.
+ * @param userAgent - The user agent string to parse
+ * @returns Detailed browser information with name, version, and engine details
+ */
 export function getDetailedBrowserInfo(userAgent: string): {
   browser_name: string;
   browser_major_version: string;
@@ -151,6 +208,11 @@ export function getDetailedBrowserInfo(userAgent: string): {
   };
 }
 
+/**
+ * Gets device information including type and screen dimensions.
+ * @param userAgent - The user agent string to parse for device type
+ * @returns Device information with type, dimensions, and pixel ratio
+ */
 export function getDeviceInfo(userAgent: string): {
   is_mobile: boolean;
   is_tablet: boolean;

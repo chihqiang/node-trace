@@ -1,462 +1,548 @@
 /**
- * 类型定义模块
- * 包含项目中使用的各种类型和接口定义
+ * Type definitions module
+ * Contains various type and interface definitions used in the project
  */
 /**
- * 事件属性类型
- * 键值对形式，值可以是字符串、数字、布尔值、null或undefined
+ * Event properties type
+ * Key-value pairs, values can be strings, numbers, booleans, null, or undefined
  */
 type EventProperties = Record<string, string | number | boolean | null | undefined>;
 /**
- * 泛型事件负载接口
- * @template T - 事件属性类型
+ * Generic event payload interface
+ * @template T - Event properties type
  */
 interface Payload<T extends EventProperties = EventProperties> {
     /**
-     * 事件ID
+     * Event ID
      */
     id: string;
     /**
-     * 事件名称
+     * Event name
      */
     event: string;
     /**
-     * 事件属性
+     * Event properties
      */
     properties?: T;
     /**
-     * 事件时间戳
+     * Event timestamp
      */
     timestamp: number;
     /**
-     * 扩展参数
+     * Extended parameters
      */
     [key: string]: unknown;
 }
 /**
- * 配置选项接口
+ * Configuration options interface
  */
 interface Options {
     /**
-     * 应用ID
+     * Application ID
      */
     appId: string;
     /**
-     * 应用密钥
+     * Application key
      */
     appKey?: string;
     /**
-     * 事件发送端点
+     * Event sending endpoint
      */
     endpoint: string;
     /**
-     * 是否开启调试模式
+     * Whether to enable debug mode
      */
     debug?: boolean;
     /**
-     * 事件采样率（0-1）
+     * Event sampling rate (0-1)
      */
     sampleRate?: number;
     /**
-     * 事件黑名单
+     * Event blacklist
      */
     blacklist?: string[];
     /**
-     * 事件白名单
+     * Event whitelist
      */
     whitelist?: string[];
     /**
-     * 批量发送大小
+     * Batch send size
      */
     batchSize?: number;
     /**
-     * 批量发送间隔（毫秒）
+     * Batch send interval (milliseconds)
      */
     batchInterval?: number;
     /**
-     * 是否启用离线缓存
+     * Whether to enable offline cache
      */
     offlineEnabled?: boolean;
     /**
-     * 最大队列大小
+     * Maximum queue size
      */
     maxQueueSize?: number;
     /**
-     * 重试次数
+     * Retry count
      */
     retryCount?: number;
     /**
-     * 重试间隔（毫秒）
+     * Retry interval (milliseconds)
      */
     retryInterval?: number;
     /**
-     * 请求头
+     * Request headers
      */
     headers?: Record<string, string>;
     /**
-     * 超时时间（毫秒）
+     * Timeout (milliseconds)
      */
     timeout?: number;
     /**
-     * 发送前回调函数
+     * Before send callback function
      */
     beforeSend?: <T extends EventProperties>(event: Payload<T>) => Payload<T> | null;
 }
 /**
- * 插件生命周期阶段
+ * Plugin lifecycle stage
  */
 type PluginLifecycle = 'idle' | 'loading' | 'active' | 'error' | 'destroyed';
 /**
- * 插件上下文接口
+ * Plugin context interface
  */
 interface IPluginContext {
     /**
-     * 获取插件管理器实例
+     * Get plugin manager instance
      */
     getPlugins(): Record<string, IPlugin>;
     /**
-     * 获取指定插件实例
-     * @param {string} name - 插件名称
-     * @returns {IPlugin | null} 插件实例
+     * Get specified plugin instance
+     * @param name - Plugin name
+     * @returns Plugin instance
      */
     getPlugin(name: string): IPlugin | null;
     /**
-     * 获取所有已注册的插件
-     * @returns {IPlugin[]} 插件列表
+     * Get all registered plugins
+     * @returns Plugin list
      */
     getAllPlugins(): IPlugin[];
     /**
-     * 调用插件方法
-     * @param {string} pluginName - 插件名称
-     * @param {string} methodName - 方法名称
-     * @param {unknown[]} args - 方法参数
-     * @returns {unknown} 方法返回值
+     * Call plugin method
+     * @param pluginName - Plugin name
+     * @param methodName - Method name
+     * @param args - Method arguments
+     * @returns Method return value
      */
     callPluginMethod(pluginName: string, methodName: string, ...args: unknown[]): unknown;
 }
 /**
- * 插件接口
+ * Plugin interface
  */
 interface IPlugin {
     /**
-     * 插件名称
+     * Plugin name
      */
     name: string;
     /**
-     * 插件版本
+     * Plugin version
      */
     version?: string;
     /**
-     * 插件描述
+     * Plugin description
      */
     description?: string;
     /**
-     * 插件设置方法
+     * Plugin setup method
      */
     setup?(context: IPluginContext): void;
     /**
-     * 插件初始化方法
+     * Plugin initialization method
      */
     init?(context: IPluginContext): void;
     /**
-     * 插件激活方法
+     * Plugin activation method
      */
     activate?(context: IPluginContext): void;
     /**
-     * 插件停用方法
+     * Plugin deactivation method
      */
     deactivate?(context: IPluginContext): void;
     /**
-     * 插件销毁方法
+     * Plugin destruction method
      */
     destroy?(context: IPluginContext): void;
     /**
-     * 插件依赖
+     * Plugin dependencies
      */
     dependencies?: string[];
     /**
-     * 插件冲突
+     * Plugin conflicts
      */
     conflicts?: string[];
     /**
-     * 插件优先级（数字越小，优先级越高）
+     * Plugin priority (lower number means higher priority)
      */
     priority?: number;
     /**
-     * 插件是否启用
+     * Whether the plugin is enabled
      */
     enabled?: boolean;
     /**
-     * 插件生命周期状态
+     * Plugin lifecycle status
      */
     lifecycle?: PluginLifecycle;
     /**
-     * 事件跟踪前回调
+     * Before event tracking callback
      */
     onTrack?: <T extends EventProperties>(event: Payload<T>) => Payload<T> | null;
     /**
-     * 事件跟踪后回调
+     * After event tracking callback
      */
     onTracked?: <T extends EventProperties>(event: Payload<T>) => void;
     /**
-     * 发送前回调
+     * Before send callback
      */
     beforeSend?: <T extends EventProperties>(events: Payload<T>[]) => Payload<T>[];
     /**
-     * 发送后回调
+     * After send callback
      */
     afterSend?: <T extends EventProperties>(events: Payload<T>[], success: boolean) => void;
     /**
-     * 初始化前回调
+     * Before initialization callback
      */
     beforeInit?(context: IPluginContext): void;
     /**
-     * 初始化后回调
+     * After initialization callback
      */
     afterInit?(context: IPluginContext): void;
     /**
-     * 销毁前回调
+     * Before destruction callback
      */
     beforeDestroy?(context: IPluginContext): void;
     /**
-     * 销毁后回调
+     * After destruction callback
      */
     afterDestroy?(context: IPluginContext): void;
     /**
-     * 插件配置
+     * Plugin configuration
      */
     config?: Record<string, unknown>;
     /**
-     * 插件状态
+     * Plugin state
      */
     state?: Record<string, unknown>;
     /**
-     * 获取插件信息
+     * Get plugin information
      */
     getInfo?: () => Record<string, unknown>;
 }
 
 /**
- * 核心模块
- * 包含初始化、事件跟踪、插件管理等核心功能
+ * Core module
+ * Contains core functions like initialization, event tracking, and plugin management
  */
 
 /**
- * 插件管理器
- * 负责插件的注册、初始化、销毁等操作
+ * Plugin manager
+ * Responsible for plugin registration, initialization, and destruction
  */
 declare class Plugins {
     /**
-     * 插件映射
+     * Plugin map
      * @private
      * @type {Map<string, IPlugin>}
      */
     private plugins;
     /**
-     * 创建插件上下文
-     * @returns {IPluginContext} 插件上下文
+     * Create plugin context
+     * @returns Plugin context
      */
     private createPluginContext;
     /**
-     * 注册插件
-     * @param {IPlugin} plugin - 插件实例
-     * @returns {boolean} 是否注册成功
+     * Register plugin
+     * @param plugin - Plugin instance
+     * @returns Whether registration was successful
      */
     register(plugin: IPlugin): boolean;
     /**
-     * 初始化插件
-     * @param {IPlugin} plugin - 插件实例
-     * @returns {boolean} 是否初始化成功
+     * Initialize plugin
+     * @param plugin - Plugin instance
+     * @returns Whether initialization was successful
      */
     init(plugin: IPlugin): boolean;
     /**
-     * 销毁插件
-     * @param {IPlugin} plugin - 插件实例
-     * @returns {boolean} 是否销毁成功
+     * Destroy plugin
+     * @param plugin - Plugin instance
+     * @returns Whether destruction was successful
      */
     destroy(plugin: IPlugin): boolean;
     /**
-     * 获取插件
-     * @param {string} name - 插件名称
-     * @returns {IPlugin | undefined} 插件实例
+     * Get plugin
+     * @param name - Plugin name
+     * @returns Plugin instance
      */
     get(name: string): IPlugin | undefined;
     /**
-     * 获取所有插件
-     * @returns {IPlugin[]} 插件列表
+     * Get all plugins
+     * @returns Plugin list
      */
     getAll(): IPlugin[];
     /**
-     * 获取启用的插件
-     * @returns {IPlugin[]} 启用的插件列表
+     * Get enabled plugins
+     * @returns Enabled plugin list
      */
     getEnabled(): IPlugin[];
     /**
-     * 启用插件
-     * @param {string} name - 插件名称
-     * @returns {boolean} 是否启用成功
+     * Enable plugin
+     * @param name - Plugin name
+     * @returns Whether enabling was successful
      */
     enable(name: string): boolean;
     /**
-     * 禁用插件
-     * @param {string} name - 插件名称
-     * @returns {boolean} 是否禁用成功
+     * Disable plugin
+     * @param name - Plugin name
+     * @returns Whether disabling was successful
      */
     disable(name: string): boolean;
     /**
-     * 移除插件
-     * @param {string} name - 插件名称
-     * @returns {boolean} 是否移除成功
+     * Remove plugin
+     * @param name - Plugin name
+     * @returns Whether removal was successful
      */
     remove(name: string): boolean;
     /**
-     * 清空插件
+     * Clear all plugins
      */
     clear(): void;
     /**
-     * 按优先级排序插件
-     * @returns {IPlugin[]} 排序后的插件列表
+     * Sort plugins by priority
+     * @returns Sorted plugin list
      */
     sort(): IPlugin[];
 }
 /**
- * 插件管理器实例
+ * Plugin manager instance
  * @type {PluginManager}
  */
 declare const plugins: Plugins;
 /**
- * 初始化配置
- * @param {Options} options - 配置选项
+ * Initialize configuration
+ * @param options - Configuration options
  */
 declare function init(options: Options): void;
 /**
- * 使用插件
- * @param {IPlugin} plugin - 插件实例
+ * Use plugin
+ * @param plugin - Plugin instance
  */
 declare function use(plugin: IPlugin): void;
 /**
- * 跟踪事件
+ * Track event
  * @template T
- * @param {string} event - 事件名称
- * @param {T} [properties] - 事件属性
- * @returns {void}
+ * @param event - Event name
+ * @param [properties] - Event properties
  */
 declare function track<T extends EventProperties>(event: string, properties?: T): void;
 
 /**
- * 队列管理模块
- * 负责事件的推送、调度、发送和离线缓存等功能
- * 重构为模块化架构，提高可维护性和可测试性
+ * Queue management module
+ * Responsible for event push, scheduling, sending, and offline caching
+ * Refactored to modular architecture for better maintainability and testability
  */
 
 /**
- * 发送队列中的事件
+ * Send events in queue
  */
 declare function flush(): Promise<void>;
 /**
- * 清除所有定时器
+ * Clear all timers
  */
 declare function clearTimers(): void;
 
 /**
- * 用户管理插件
- * 负责设备ID和用户ID的生成、存储和管理
+ * User management plugin
+ * Responsible for device ID and user ID generation, storage, and management
  */
 
 /**
- * 异步版本的设备ID生成
- * @returns 设备ID
+ * Asynchronous version of device ID generation
+ * @returns Device ID
  */
 declare function generateStableDeviceIdAsync(): Promise<string>;
 /**
- * 获取设备ID
- * @returns 设备ID
+ * Gets device ID
+ * @returns Device ID
  */
 declare function getDeviceId(): string;
 /**
- * 设置用户ID
- * @param id - 用户ID
+ * Sets user ID
+ * @param id - User ID
  */
 declare function setID(id: string): void;
 /**
- * 获取用户ID
- * @returns 用户ID
+ * Gets user ID
+ * @returns User ID
  */
 declare function getID(): string;
 /**
- * 清除用户ID
+ * Clears user ID
  */
 declare function clearID(): void;
 /**
- * 用户插件
+ * User plugin
  */
 declare const userPlugin: IPlugin;
 
 declare const storageUtils: {
+    /**
+     * Gets a value from localStorage
+     * @param key - The storage key name
+     * @param parser - Optional parser function to parse the stored string value
+     * @returns The stored value, or null if not found or an error occurs
+     */
     get: (key: string, parser?: (value: string) => unknown) => unknown;
+    /**
+     * Sets a value in localStorage
+     * @param key - The storage key name
+     * @param value - The value to store, non-string values will be converted to JSON string
+     * @returns true if operation succeeds, false if it fails
+     */
     set: (key: string, value: unknown) => boolean;
+    /**
+     * Removes a value from localStorage by key
+     * @param key - The key name to remove
+     * @returns true if operation succeeds, false if it fails
+     */
     remove: (key: string) => boolean;
+    /**
+     * Clears all data from localStorage
+     * @returns true if operation succeeds, false if it fails
+     */
     clear: () => boolean;
 };
 
+/**
+ * Browser data interface
+ * Contains various information collected from the browser environment
+ */
 interface BrowserData {
+    /** Device ID */
     device_id: string;
+    /** Event name */
     event: string;
+    /** User agent string */
     user_agent: string;
+    /** Device width */
     device_width: number;
+    /** Device height */
     device_height: number;
+    /** Whether online */
     is_online: boolean;
+    /** Connection type */
     connection_type?: string;
+    /** Downlink speed */
     downlink?: number;
+    /** Effective connection type */
     effective_type?: string;
+    /** Round-trip time */
     rtt?: number;
+    /** Application code name */
     app_code_name: string;
+    /** Application name */
     app_name: string;
+    /** Language setting */
     language: string;
+    /** Platform information */
     platform: string;
+    /** Time zone */
     time_zone: string;
+    /** Browser version */
     browser_version?: string;
+    /** Browser name */
     browser_name?: string;
+    /** Browser major version */
     browser_major_version?: string;
+    /** Engine name */
     engine_name?: string;
+    /** Engine version */
     engine_version?: string;
+    /** Device pixel ratio */
     device_pixel_ratio: number;
+    /** Whether mobile device */
     is_mobile?: boolean;
+    /** Whether tablet device */
     is_tablet?: boolean;
+    /** Whether desktop device */
     is_desktop?: boolean;
+    /** Current URL */
     current_url: string;
+    /** Path name */
     pathname: string;
+    /** Host name */
     hostname: string;
+    /** Protocol */
     protocol: string;
+    /** Port */
     port?: string;
+    /** Query string */
     search?: string;
+    /** Hash value */
     hash?: string;
+    /** Document URL */
     document_url: string;
+    /** Referrer URL */
     referrer_url: string;
+    /** Content type */
     content_type: string;
+    /** Document title */
     document_title: string;
+    /** Document character set */
     document_charset: string;
+    /** Document ready state */
     document_ready_state?: string;
+    /** Screen width */
     screen_width: number;
+    /** Screen height */
     screen_height: number;
+    /** Screen available width */
     screen_available_width: number;
+    /** Screen available height */
     screen_available_height: number;
+    /** Screen color depth */
     screen_color_depth: number;
+    /** Horizontal scroll position */
     scroll_x: number;
+    /** Vertical scroll position */
     scroll_y: number;
+    /** Country */
     country?: string;
+    /** Region */
     region?: string;
+    /** City */
     city?: string;
+    /** Begin time */
     begin_time: number;
+    /** Dynamic properties */
     [propName: string]: unknown;
 }
+/**
+ * Browser utility object
+ * Provides utility methods to get browser and device related information
+ */
 declare const browserUtils: {
+    /**
+     * Gets browser information
+     * @returns Browser name, version, and platform information
+     */
     getBrowser: () => {
         name: string;
         version: string;
         platform: string;
     };
+    /**
+     * Gets device type
+     * @returns Device type: mobile, tablet, desktop, or unknown
+     */
     getDeviceType: () => "mobile" | "tablet" | "desktop" | "unknown";
+    /** Gets network state */
     getNetworkState: () => {
         type: "online" | "offline";
         effectiveType: "2g" | "3g" | "4g" | "5g" | "unknown";
@@ -464,81 +550,90 @@ declare const browserUtils: {
         downlink: number;
     };
 };
+/**
+ * Gets browser data
+ * Collects and returns various information from the current browser environment
+ * @returns Browser data object
+ */
 declare function getBrowserData(): BrowserData;
+/**
+ * Browser data collection plugin
+ * Automatically collects browser environment data during event tracking
+ */
 declare const browserPlugin: IPlugin;
 
 /**
- * 会话管理插件
- * 负责会话的创建、维护、超时处理和会话数据的收集
+ * Session management plugin
+ * Responsible for session creation, maintenance, timeout handling, and session data collection
  */
 
 /**
- * 会话管理器类
+ * Session manager class
  */
 declare class Sessions {
     /**
-     * 会话状态
+     * Session state
      */
     private session;
     /**
-     * 超时定时器ID
+     * Timeout ID
      */
     private timeoutId;
     /**
-     * 内存缓存
+     * Memory cache
      */
     private storageCache;
     /**
-     * 上次存储同步时间
+     * Last storage sync time
      */
     private lastStorageSync;
     /**
-     * 存储同步间隔（毫秒）
+     * Storage sync interval (milliseconds)
      */
     private syncInterval;
     /**
-     * 初始化会话
+     * Initialize session
      */
     start(): void;
     /**
-     * 更新会话最后活动时间
+     * Update session last active time
      */
     updateLastActive(): void;
     /**
-     * 获取会话ID
-     * @returns {string | null} 会话ID
+     * Get session ID
+     * @returns Session ID
      */
     getID(): string | null;
     /**
-     * 获取会话开始时间
-     * @returns {number | null} 会话开始时间
+     * Get session start time
+     * @returns Session start time
      */
     getStartTime(): number | null;
     /**
-     * 获取会话持续时间
-     * @returns {number} 会话持续时间
+     * Get session duration
+     * @returns Session duration
      */
     getDuration(): number;
     /**
-     * 检查是否为新会话
-     * @returns {boolean} 是否为新会话
+     * Check if it's a new session
+     * @returns Whether it's a new session
      */
     isNew(): boolean;
     /**
-     * 清理定时器
+     * Clear timeout
      */
     clearTimeout(): void;
     /**
-     * 增加页面浏览次数
+     * Increment page views count
      */
     incrementPageViews(): void;
     /**
-     * 增加事件次数
+     * Increment events count
      */
     incrementEvents(): void;
     /**
-     * 获取会话统计信息
-     * @returns {Object} 会话统计信息
+     * Get session statistics
+     * @returns Session statistics
      */
     getStats(): {
         pageViews: number;
@@ -546,149 +641,149 @@ declare class Sessions {
         duration: number;
     };
     /**
-     * 获取会话上下文
-     * @returns {EventProperties} 会话上下文
+     * Get session context
+     * @returns Session context
      */
     getContext(): EventProperties;
     /**
-     * 结束会话
+     * Stop session
      */
     stop(): void;
     /**
-     * 开始会话超时定时器
+     * Start session timeout
      */
     private startSessionTimeout;
     /**
-     * 重置会话超时定时器
+     * Reset session timeout
      */
     private resetSessionTimeout;
     /**
-     * 同步存储缓存
+     * Sync storage cache
      */
     private syncStorage;
     /**
-     * 获取或创建会话
-     * @returns {SessionState} 会话状态
+     * Get or create session
+     * @returns Session state
      */
     private getOrCreateSession;
     /**
-     * 生成会话ID
-     * @returns {string} 会话ID
+     * Generate session ID
+     * @returns Session ID
      */
     private generateSessionId;
 }
 /**
- * 会话管理器实例
+ * Session manager instance
  */
 declare const sessions: Sessions;
 /**
- * 会话插件
+ * Session plugin
  */
 declare const sessionPlugin: IPlugin;
 
 /**
- * 行为管理插件
- * 负责跟踪用户行为、页面浏览和行为分析
+ * Behavior management plugin
+ * Responsible for tracking user behavior, page views, and behavior analysis
  */
 
 /**
- * 行为步骤接口
+ * Behavior step interface
  */
 interface BehaviorStep {
     /**
-     * 事件名称
+     * Event name
      */
     event: string;
     /**
-     * 时间戳
+     * Timestamp
      */
     timestamp: number;
     /**
-     * 事件属性
+     * Event properties
      */
     properties: EventProperties;
     /**
-     * 路径
+     * Path
      */
     path: string;
     /**
-     * 来源
+     * Referrer
      */
     referrer: string;
 }
 /**
- * 行为管理器
- * 负责跟踪和管理用户行为
+ * Behavior manager
+ * Responsible for tracking and managing user behavior
  */
 declare class Behaviors {
     /**
-     * 行为路径
+     * Behavior path
      * @private
      */
     private behaviorPath;
     /**
-     * 保存定时器ID
+     * Save timeout ID
      * @private
      */
     private saveTimeoutId;
     /**
-     * 最后保存时间
+     * Last save time
      * @private
      */
     private lastSaveTime;
     /**
-     * 保存间隔（毫秒）
+     * Save interval (milliseconds)
      * @private
      */
     private saveInterval;
     /**
-     * 初始化行为管理器
+     * Initialize behavior manager
      */
     init(): void;
     /**
-     * 加载行为路径
+     * Load behavior path
      * @private
-     * @returns {BehaviorStep[]} 行为路径
+     * @returns Behavior path
      */
     private loadBehaviorPath;
     /**
-     * 保存行为路径
+     * Save behavior path
      * @private
      */
     private saveBehaviorPath;
     /**
-     * 实际保存行为路径到存储
+     * Actually save behavior path to storage
      * @private
      */
     private saveBehaviorPathToStorage;
     /**
-     * 记录行为
-     * @param {string} event - 事件名称
-     * @param {EventProperties} [properties={}] - 事件属性
+     * Track behavior
+     * @param event - Event name
+     * @param properties - Event properties
      */
     track(event: string, properties?: EventProperties): void;
     /**
-     * 记录页面浏览
-     * @param {EventProperties} [properties={}] - 页面属性
+     * Track page view
+     * @param properties - Page properties
      */
     trackView(properties?: EventProperties): void;
     /**
-     * 获取行为路径
-     * @returns {BehaviorStep[]} 行为路径
+     * Get behavior path
+     * @returns Behavior path
      */
     getPath(): BehaviorStep[];
     /**
-     * 获取最近的行为
-     * @param {number} [limit=10] - 限制数量
-     * @returns {BehaviorStep[]} 最近的行为
+     * Get recent behaviors
+     * @param limit - Limit count
+     * @returns Recent behaviors
      */
     getRecent(limit?: number): BehaviorStep[];
     /**
-     * 获取行为路径统计
-     * @returns {Object} 行为统计信息
-     * @returns {number} totalSteps - 总步骤数
-     * @returns {number} uniqueEvents - 唯一事件数
-     * @returns {number} averageTimeBetweenSteps - 步骤间平均时间
+     * Get behavior path statistics
+     * @returns Behavior statistics
+     * @returns totalSteps - Total steps
+     * @returns uniqueEvents - Unique events count
+     * @returns averageTimeBetweenSteps - Average time between steps
      */
     getStats(): {
         totalSteps: number;
@@ -696,24 +791,24 @@ declare class Behaviors {
         averageTimeBetweenSteps: number;
     };
     /**
-     * 获取行为路径上下文
-     * @returns {EventProperties} 行为上下文
+     * Get behavior path context
+     * @returns Behavior context
      */
     getContext(): EventProperties;
     /**
-     * 清空行为路径
+     * Clear behavior path
      */
     clear(): void;
     /**
-     * 清除定时器
+     * Clear timeouts
      */
     clearTimeouts(): void;
     /**
-     * 分析行为路径
-     * @returns {Object} 行为分析结果
-     * @returns {Array} mostFrequentEvents - 最频繁的事件
-     * @returns {Array} commonPaths - 常见路径
-     * @returns {number} averageSessionDuration - 平均会话持续时间
+     * Analyze behavior path
+     * @returns Behavior analysis result
+     * @returns mostFrequentEvents - Most frequent events
+     * @returns commonPaths - Common paths
+     * @returns averageSessionDuration - Average session duration
      */
     analyze(): {
         mostFrequentEvents: Array<{
@@ -727,156 +822,156 @@ declare class Behaviors {
         averageSessionDuration: number;
     };
     /**
-     * 提取会话
+     * Extract sessions
      * @private
-     * @returns {Array} 会话列表
+     * @returns Session list
      */
     private extractSessions;
 }
 /**
- * 行为管理器实例
+ * Behavior manager instance
  */
 declare const behaviors: Behaviors;
 /**
- * 行为插件
+ * Behavior plugin
  */
 declare const behaviorPlugin: IPlugin;
 
 /**
- * 错误插件
- * 负责监听和捕获JavaScript错误和未处理的Promise拒绝
+ * Error plugin
+ * Responsible for listening to and capturing JavaScript errors and unhandled Promise rejections
  */
 
 /**
- * 错误插件
+ * Error plugin
  */
 declare const errorPlugin: IPlugin;
 
 /**
- * 性能插件
- * 负责收集和发送页面性能数据，包括加载时间、首字节时间、DOM解析时间等
+ * Performance plugin
+ * Responsible for collecting and sending page performance data, including load time, time to first byte, DOM parsing time, etc.
  */
 
 /**
- * 性能插件
+ * Performance plugin
  */
 declare const performancePlugin: IPlugin;
 
 /**
- * 页面浏览插件
- * 负责监控和跟踪页面浏览事件，包括初始加载和路由变化
+ * Page view plugin
+ * Responsible for monitoring and tracking page view events, including initial load and route changes
  */
 
 /**
- * 页面浏览插件
+ * Page view plugin
  */
 declare const pageviewPlugin: IPlugin;
 
 /**
- * 网络插件
- * 负责监控和跟踪网络请求，包括XMLHttpRequest和fetch请求
+ * Network plugin
+ * Responsible for monitoring and tracking network requests, including XMLHttpRequest and fetch requests
  */
 
 /**
- * 网络插件
+ * Network plugin
  */
 declare const networkPlugin: IPlugin;
 
 /**
- * 错误类型定义
+ * Error type definitions
  */
 /**
- * 错误类型
+ * Error types
  */
 type ErrorType = "network" | "network:timeout" | "network:offline" | "network:server" | "network:client" | "storage" | "storage:quota" | "storage:access" | "browser" | "plugin" | "plugin:init" | "plugin:execute" | "queue" | "queue:full" | "queue:overflow" | "device" | "session" | "session:timeout" | "behavior" | "data" | "data:validation" | "data:serialization" | "config" | "init" | "runtime" | "unknown";
 /**
- * 错误级别
+ * Error levels
  */
 type ErrorLevel = "debug" | "info" | "warn" | "error" | "fatal";
 /**
- * 错误接口
+ * Error interface
  */
 interface TraceError {
     /**
-     * 错误类型
+     * Error type
      */
     type: ErrorType;
     /**
-     * 错误级别
+     * Error level
      */
     level: ErrorLevel;
     /**
-     * 错误消息
+     * Error message
      */
     message: string;
     /**
-     * 错误代码
+     * Error code
      */
     code?: string;
     /**
-     * 错误堆栈
+     * Error stack
      */
     stack?: string;
     /**
-     * 错误上下文
+     * Error context
      */
     context?: Record<string, unknown>;
     /**
-     * 错误详情
+     * Error details
      */
     details?: Record<string, unknown>;
     /**
-     * 错误来源
+     * Error source
      */
     source?: string;
     /**
-     * 错误发生的文件
+     * File where error occurred
      */
     file?: string;
     /**
-     * 错误发生的行号
+     * Line number where error occurred
      */
     line?: number;
     /**
-     * 时间戳
+     * Timestamp
      */
     timestamp: number;
     /**
-     * 错误ID
+     * Error ID
      */
     id: string;
     /**
-     * 相关事件
+     * Related event
      */
     event?: string;
     /**
-     * 用户ID
+     * User ID
      */
     userId?: string;
     /**
-     * 设备ID
+     * Device ID
      */
     deviceId?: string;
 }
 /**
- * 错误处理配置
+ * Error handler configuration
  */
 interface ErrorHandlerConfig {
     /**
-     * 是否捕获错误
+     * Whether to capture errors
      */
     capture: boolean;
     /**
-     * 日志级别
+     * Log level
      */
     logLevel: ErrorLevel;
     /**
-     * 最大错误数量
+     * Maximum number of errors
      */
     maxErrors: number;
 }
 /**
- * 错误统计接口
+ * Error statistics interface
  */
 interface ErrorStats {
     total: number;
@@ -892,7 +987,7 @@ interface ErrorStats {
     maxConsecutiveErrors: number;
 }
 /**
- * 错误摘要接口
+ * Error summary interface
  */
 interface ErrorSummary {
     total: number;
@@ -906,101 +1001,101 @@ interface ErrorSummary {
 }
 
 /**
- * 错误处理类
- * 负责捕获、记录和处理错误
+ * Error handler class
+ * Responsible for capturing, recording, and handling errors
  */
 declare class ErrorHandler {
     /**
-     * 配置
+     * Configuration
      * @private
      */
     private config;
     /**
-     * 错误队列
+     * Error queue
      * @private
      */
     private errors;
     /**
-     * 错误统计
+     * Error statistics
      * @private
      */
     private stats;
     /**
-     * 错误时间戳列表
+     * Error timestamp list
      * @private
      */
     private errorTimestamps;
     /**
-     * 构造函数
-     * @param {Partial<ErrorHandlerConfig>} [config] - 配置选项
+     * Constructor
+     * @param config - Configuration options
      */
     constructor(config?: Partial<ErrorHandlerConfig>);
     /**
-     * 初始化错误统计
+     * Initialize error statistics
      * @private
      */
     private initStats;
     /**
-     * 生成错误ID
+     * Generate error ID
      * @private
-     * @returns {string} 错误ID
+     * @returns Error ID
      */
     private generateErrorId;
     /**
-     * 解析错误堆栈
+     * Parse error stack
      * @private
-     * @param {string} stack - 错误堆栈
-     * @returns {Object} 解析结果
+     * @param stack - Error stack
+     * @returns Parsed result
      */
     private parseStack;
     /**
-     * 更新错误统计
+     * Update error statistics
      * @private
-     * @param {TraceError} error - 错误对象
+     * @param error - Error object
      */
     private updateStats;
     /**
-     * 记录错误
-     * @param {ErrorType} type - 错误类型
-     * @param {string} message - 错误消息
-     * @param {unknown} [error] - 原始错误对象
-     * @param {Record<string, unknown>} [context] - 错误上下文
-     * @param {ErrorLevel} [level=error] - 错误级别
-     * @param {string} [code] - 错误代码
-     * @param {string} [source] - 错误来源
+     * Record error
+     * @param type - Error type
+     * @param message - Error message
+     * @param error - Original error object
+     * @param context - Error context
+     * @param level - Error level
+     * @param code - Error code
+     * @param source - Error source
      */
     captureError(type: ErrorType, message: string, error?: unknown, context?: Record<string, unknown>, level?: ErrorLevel, code?: string, source?: string): TraceError;
     /**
-     * 检查错误率
+     * Check error rate
      * @private
-     * @param {TraceError} error - 错误对象
+     * @param error - Error object
      */
     private checkErrorRate;
     /**
-     * 记录错误日志
+     * Log error
      * @private
-     * @param {TraceError} error - 错误对象
+     * @param error - Error object
      */
     private logError;
     /**
-     * 获取错误统计
-     * @returns {ErrorStats} 错误统计信息
+     * Get error statistics
+     * @returns Error statistics information
      */
     getStats(): ErrorStats;
     /**
-     * 获取最近的错误
-     * @param {number} [count=10] - 错误数量
-     * @returns {TraceError[]} 最近的错误列表
+     * Get recent errors
+     * @param count - Number of errors
+     * @returns List of recent errors
      */
     getRecentErrors(count?: number): TraceError[];
     /**
-     * 检查是否有错误
-     * @returns {boolean} 是否有错误
+     * Check if there are errors
+     * @returns Whether there are errors
      */
     hasErrors(): boolean;
     /**
-     * 获取错误摘要
-     * @returns {ErrorSummary} 错误摘要
+     * Get error summary
+     * @returns Error summary
      */
     getErrorSummary(): {
         total: number;
@@ -1013,187 +1108,187 @@ declare class ErrorHandler {
         };
     };
     /**
-     * 检查是否应该记录该级别的错误
+     * Check if this error level should be logged
      * @private
-     * @param {ErrorLevel} level - 错误级别
-     * @returns {boolean} 是否应该记录
+     * @param level - Error level
+     * @returns Whether to log
      */
     private shouldLog;
     /**
-     * 获取错误队列
-     * @returns {TraceError[]} 错误队列
+     * Get error queue
+     * @returns Error queue
      */
     getErrors(): TraceError[];
     /**
-     * 清空错误队列
+     * Clear error queue
      */
     clearErrors(): void;
     /**
-     * 处理网络错误
-     * @param {unknown} error - 错误对象
-     * @param {Record<string, unknown>} [context] - 错误上下文
+     * Handle network error
+     * @param error - Error object
+     * @param context - Error context
      */
     handleNetworkError(error: unknown, context?: Record<string, unknown>): void;
     /**
-     * 处理存储错误
-     * @param {unknown} error - 错误对象
-     * @param {Record<string, unknown>} [context] - 错误上下文
+     * Handle storage error
+     * @param error - Error object
+     * @param context - Error context
      */
     handleStorageError(error: unknown, context?: Record<string, unknown>): void;
     /**
-     * 处理浏览器 API 错误
-     * @param {unknown} error - 错误对象
-     * @param {Record<string, unknown>} [context] - 错误上下文
+     * Handle browser API error
+     * @param error - Error object
+     * @param context - Error context
      */
     handleBrowserError(error: unknown, context?: Record<string, unknown>): void;
     /**
-     * 处理插件错误
-     * @param {unknown} error - 错误对象
-     * @param {Record<string, unknown>} [context] - 错误上下文
+     * Handle plugin error
+     * @param error - Error object
+     * @param context - Error context
      */
     handlePluginError(error: unknown, context?: Record<string, unknown>): void;
     /**
-     * 处理队列错误
-     * @param {unknown} error - 错误对象
-     * @param {Record<string, unknown>} [context] - 错误上下文
+     * Handle queue error
+     * @param error - Error object
+     * @param context - Error context
      */
     handleQueueError(error: unknown, context?: Record<string, unknown>): void;
     /**
-     * 处理设备 ID 错误
-     * @param {unknown} error - 错误对象
-     * @param {Record<string, unknown>} [context] - 错误上下文
+     * Handle device ID error
+     * @param error - Error object
+     * @param context - Error context
      */
     handleDeviceError(error: unknown, context?: Record<string, unknown>): void;
     /**
-     * 处理会话错误
-     * @param {unknown} error - 错误对象
-     * @param {Record<string, unknown>} [context] - 错误上下文
+     * Handle session error
+     * @param error - Error object
+     * @param context - Error context
      */
     handleSessionError(error: unknown, context?: Record<string, unknown>): void;
     /**
-     * 处理行为错误
-     * @param {unknown} error - 错误对象
-     * @param {Record<string, unknown>} [context] - 错误上下文
+     * Handle behavior error
+     * @param error - Error object
+     * @param context - Error context
      */
     handleBehaviorError(error: unknown, context?: Record<string, unknown>): void;
     /**
-     * 处理数据错误
-     * @param {unknown} error - 错误对象
-     * @param {Record<string, unknown>} [context] - 错误上下文
+     * Handle data error
+     * @param error - Error object
+     * @param context - Error context
      */
     handleDataError(error: unknown, context?: Record<string, unknown>): void;
     /**
-     * 处理未知错误
-     * @param {unknown} error - 错误对象
-     * @param {Record<string, unknown>} [context] - 错误上下文
+     * Handle unknown error
+     * @param error - Error object
+     * @param context - Error context
      */
     handleUnknownError(error: unknown, context?: Record<string, unknown>): void;
 }
 
 /**
- * 错误统计模块
+ * Error statistics module
  */
 
 /**
- * 初始化错误统计
- * @returns {ErrorStats} 初始化后的错误统计对象
+ * Initialize error statistics
+ * @returns Initialized error statistics object
  */
 declare function initializeStats(): ErrorStats;
 /**
- * 计算错误率
- * @param {number[]} timestamps - 错误时间戳列表
- * @returns {Object} 错误率对象
+ * Calculate error rate
+ * @param timestamps - List of error timestamps
+ * @returns Error rate object
  */
 declare function calculateErrorRate(timestamps: number[]): {
     lastMinute: number;
     lastHour: number;
 };
 /**
- * 生成错误摘要
- * @param {TraceError[]} errors - 错误列表
- * @param {ErrorStats} stats - 错误统计
- * @returns {ErrorSummary} 错误摘要
+ * Generate error summary
+ * @param errors - List of errors
+ * @param stats - Error statistics
+ * @returns Error summary
  */
 declare function generateErrorSummary(errors: TraceError[], stats: ErrorStats): ErrorSummary;
 /**
- * 清理过期的时间戳
- * @param {number[]} timestamps - 时间戳列表
- * @param {number} threshold - 阈值时间戳
- * @returns {number[]} 清理后的时间戳列表
+ * Clean up expired timestamps
+ * @param timestamps - List of timestamps
+ * @param threshold - Threshold timestamp
+ * @returns Cleaned list of timestamps
  */
 declare function cleanupTimestamps(timestamps: number[], threshold: number): number[];
 
 /**
- * 错误处理器实例
+ * Error handler instance
  */
 declare const errorHandler: ErrorHandler;
 /**
- * 记录错误
- * @param {import('./types').ErrorType} type - 错误类型
- * @param {string} message - 错误消息
- * @param {unknown} [error] - 原始错误对象
- * @param {Record<string, unknown>} [context] - 错误上下文
- * @param {import('./types').ErrorLevel} [level=error] - 错误级别
+ * Capture error
+ * @param type - Error type
+ * @param message - Error message
+ * @param error - Original error object
+ * @param context - Error context
+ * @param level - Error level
  */
 declare function captureError(type: ErrorType, message: string, error?: unknown, context?: Record<string, unknown>, level?: ErrorLevel): void;
 /**
- * 处理网络错误
- * @param {unknown} error - 错误对象
- * @param {Record<string, unknown>} [context] - 错误上下文
+ * Handle network error
+ * @param error - Error object
+ * @param context - Error context
  */
 declare function handleNetworkError(error: unknown, context?: Record<string, unknown>): void;
 /**
- * 处理存储错误
- * @param {unknown} error - 错误对象
- * @param {Record<string, unknown>} [context] - 错误上下文
+ * Handle storage error
+ * @param error - Error object
+ * @param context - Error context
  */
 declare function handleStorageError(error: unknown, context?: Record<string, unknown>): void;
 /**
- * 处理浏览器 API 错误
- * @param {unknown} error - 错误对象
- * @param {Record<string, unknown>} [context] - 错误上下文
+ * Handle browser API error
+ * @param error - Error object
+ * @param context - Error context
  */
 declare function handleBrowserError(error: unknown, context?: Record<string, unknown>): void;
 /**
- * 处理插件错误
- * @param {unknown} error - 错误对象
- * @param {Record<string, unknown>} [context] - 错误上下文
+ * Handle plugin error
+ * @param error - Error object
+ * @param context - Error context
  */
 declare function handlePluginError(error: unknown, context?: Record<string, unknown>): void;
 /**
- * 处理队列错误
- * @param {unknown} error - 错误对象
- * @param {Record<string, unknown>} [context] - 错误上下文
+ * Handle queue error
+ * @param error - Error object
+ * @param context - Error context
  */
 declare function handleQueueError(error: unknown, context?: Record<string, unknown>): void;
 /**
- * 处理设备 ID 错误
- * @param {unknown} error - 错误对象
- * @param {Record<string, unknown>} [context] - 错误上下文
+ * Handle device ID error
+ * @param error - Error object
+ * @param context - Error context
  */
 declare function handleDeviceError(error: unknown, context?: Record<string, unknown>): void;
 /**
- * 处理会话错误
- * @param {unknown} error - 错误对象
- * @param {Record<string, unknown>} [context] - 错误上下文
+ * Handle session error
+ * @param error - Error object
+ * @param context - Error context
  */
 declare function handleSessionError(error: unknown, context?: Record<string, unknown>): void;
 /**
- * 处理行为错误
- * @param {unknown} error - 错误对象
- * @param {Record<string, unknown>} [context] - 错误上下文
+ * Handle behavior error
+ * @param error - Error object
+ * @param context - Error context
  */
 declare function handleBehaviorError(error: unknown, context?: Record<string, unknown>): void;
 /**
- * 处理数据错误
- * @param {unknown} error - 错误对象
- * @param {Record<string, unknown>} [context] - 错误上下文
+ * Handle data error
+ * @param error - Error object
+ * @param context - Error context
  */
 declare function handleDataError(error: unknown, context?: Record<string, unknown>): void;
 /**
- * 处理未知错误
- * @param {unknown} error - 错误对象
- * @param {Record<string, unknown>} [context] - 错误上下文
+ * Handle unknown error
+ * @param error - Error object
+ * @param context - Error context
  */
 declare function handleUnknownError(error: unknown, context?: Record<string, unknown>): void;
 

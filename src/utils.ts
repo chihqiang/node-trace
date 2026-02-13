@@ -1,30 +1,30 @@
 /**
- * 工具函数模块
- * 包含字符串、数字、对象、数组、时间等常用工具函数
+ * Utility functions module
+ * Contains common utility functions for strings, numbers, objects, arrays, time, etc.
  */
 
 /**
- * 常量定义
+ * Constant definitions
  */
 export const CONSTANTS = {
   /**
-   * 随机字符串默认长度
+   * Default length for random string
    */
   RANDOM_STRING_DEFAULT_LENGTH: 8,
   /**
-   * 数字格式化默认小数位数
+   * Default number of decimal places for number formatting
    */
   NUMBER_FORMAT_DEFAULT_DECIMALS: 2
 }
 
 /**
- * 字符串工具函数
+ * String utility functions
  */
 export const stringUtils = {
   /**
-   * 生成随机字符串
-   * @param {number} [length=8] - 字符串长度
-   * @returns {string} 随机字符串
+   * Generate random string
+   * @param length - String length
+   * @returns Random string
    */
   random: (length: number = CONSTANTS.RANDOM_STRING_DEFAULT_LENGTH): string => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
@@ -36,8 +36,8 @@ export const stringUtils = {
   },
 
   /**
-   * 生成唯一ID
-   * @returns {string} 唯一ID
+   * Generate unique ID
+   * @returns Unique ID
    */
   uuid: (): string => {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -48,32 +48,32 @@ export const stringUtils = {
   },
 
   /**
-   * 生成事件ID
-   * @returns {string} 事件ID
+   * Generate event ID
+   * @returns Event ID
    */
   generateEventId: (): string => {
     const timestamp = now()
-    // 格式化为年月日时分毫秒
+    // Format as year-month-day-hour-minute-second-millisecond
     const date = new Date(timestamp)
     const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const month = String(date.getMonth() +1).padStart(2, '0')
     const day = String(date.getDate()).padStart(2, '0')
     const hours = String(date.getHours()).padStart(2, '0')
     const minutes = String(date.getMinutes()).padStart(2, '0')
     const seconds = String(date.getSeconds()).padStart(2, '0')
     const milliseconds = String(date.getMilliseconds()).padStart(3, '0')
     const formattedTime = `${year}${month}${day}${hours}${minutes}${seconds}${milliseconds}`
-    // 生成8位随机字符串
+    // Generate 8-character random string
     const randomPart = stringUtils.random(8)
     return `${formattedTime}${randomPart}`
   },
 
   /**
-   * 截断字符串
-   * @param {string} str - 原始字符串
-   * @param {number} maxLength - 最大长度
-   * @param {string} [suffix=...] - 后缀
-   * @returns {string} 截断后的字符串
+   * Truncate string
+   * @param str - Original string
+   * @param maxLength - Maximum length
+   * @param suffix - Suffix
+   * @returns Truncated string
    */
   truncate: (str: string, maxLength: number, suffix: string = '...'): string => {
     if (str.length <= maxLength) return str
@@ -82,35 +82,35 @@ export const stringUtils = {
 }
 
 /**
- * 数字工具函数
+ * Number utility functions
  */
 export const numberUtils = {
   /**
-   * 限制数字范围
-   * @param {number} value - 原始值
-   * @param {number} min - 最小值
-   * @param {number} max - 最大值
-   * @returns {number} 限制范围内的数字
+   * Clamp number to range
+   * @param value - Original value
+   * @param min - Minimum value
+   * @param max - Maximum value
+   * @returns Number within range
    */
   clamp: (value: number, min: number, max: number): number => {
     return Math.min(Math.max(value, min), max)
   },
 
   /**
-   * 生成随机数字
-   * @param {number} min - 最小值
-   * @param {number} max - 最大值
-   * @returns {number} 随机数字
+   * Generate random number
+   * @param min - Minimum value
+   * @param max - Maximum value
+   * @returns Random number
    */
   random: (min: number, max: number): number => {
-    return Math.floor(Math.random() * (max - min + 1)) + min
+    return Math.floor(Math.random() * (max - min +1)) + min
   },
 
   /**
-   * 格式化数字
-   * @param {number} num - 原始数字
-   * @param {number} [decimals=2] - 小数位数
-   * @returns {string} 格式化后的数字字符串
+   * Format number
+   * @param num - Original number
+   * @param decimals - Number of decimal places
+   * @returns Formatted number string
    */
   format: (num: number, decimals: number = CONSTANTS.NUMBER_FORMAT_DEFAULT_DECIMALS): string => {
     return num.toFixed(decimals)
@@ -118,20 +118,20 @@ export const numberUtils = {
 }
 
 /**
- * 对象工具函数
+ * Object utility functions
  */
 export const objectUtils = {
   /**
-   * 深度合并对象
+   * Deep merge objects
    * @template T
-   * @param {T} target - 目标对象
-   * @param {...Record<string, any>} sources - 源对象
-   * @returns {T} 合并后的对象
+   * @param target - Target object
+   * @param sources - Source objects
+   * @returns Merged object
    */
   deepMerge: <T extends Record<string, any>>(target: T, ...sources: Record<string, any>[]): T => {
     if (!sources.length) return target
     
-    // 递归合并函数
+    // Recursive merge function
     const merge = (targetObj: Record<string, any>, sourceObj: Record<string, any>): Record<string, any> => {
       const result = { ...targetObj }
       
@@ -141,10 +141,10 @@ export const objectUtils = {
           const targetValue = targetObj[key]
           
           if (sourceValue && typeof sourceValue === 'object' && targetValue && typeof targetValue === 'object') {
-            // 递归合并对象
+            // Recursively merge objects
             result[key] = merge(targetValue, sourceValue)
           } else {
-            // 直接替换值
+            // Directly replace value
             result[key] = sourceValue
           }
         }
@@ -153,7 +153,7 @@ export const objectUtils = {
       return result
     }
     
-    // 合并所有源对象
+    // Merge all source objects
     let result = { ...target }
     for (const source of sources) {
       if (source) {
@@ -165,12 +165,12 @@ export const objectUtils = {
   },
 
   /**
-   * 安全获取对象属性
+   * Safely get object property
    * @template T
-   * @param {unknown} obj - 目标对象
-   * @param {string|string[]} path - 属性路径
-   * @param {T} defaultValue - 默认值
-   * @returns {T} 获取到的值或默认值
+   * @param obj - Target object
+   * @param path - Property path
+   * @param defaultValue - Default value
+   * @returns Retrieved value or default value
    */
   get: <T>(obj: unknown, path: string | string[], defaultValue: T): T => {
     const travel = (regexp: RegExp, obj: unknown, path: string | string[]): unknown => {
@@ -189,9 +189,9 @@ export const objectUtils = {
   },
 
   /**
-   * 移除对象中的空值
-   * @param {Record<string, any>} obj - 目标对象
-   * @returns {Record<string, any>} 移除空值后的对象
+   * Remove empty values from object
+   * @param obj - Target object
+   * @returns Object with empty values removed
    */
   removeEmpty: (obj: Record<string, any>): Record<string, any> => {
     const newObj: Record<string, any> = {}
@@ -205,40 +205,40 @@ export const objectUtils = {
 }
 
 /**
- * 数组工具函数
+ * Array utility functions
  */
 export const arrayUtils = {
   /**
-   * 去重
+   * Remove duplicates
    * @template T
-   * @param {T[]} arr - 原始数组
-   * @returns {T[]} 去重后的数组
+   * @param arr - Original array
+   * @returns Array with duplicates removed
    */
   unique: <T>(arr: T[]): T[] => {
     return [...new Set(arr)]
   },
 
   /**
-   * 随机打乱数组
+   * Shuffle array randomly
    * @template T
-   * @param {T[]} arr - 原始数组
-   * @returns {T[]} 打乱后的数组
+   * @param arr - Original array
+   * @returns Shuffled array
    */
   shuffle: <T>(arr: T[]): T[] => {
     const result = [...arr]
-    for (let i = result.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
+    for (let i = result.length -1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i +1))
       ;[result[i], result[j]] = [result[j], result[i]]
     }
     return result
   },
 
   /**
-   * 分批处理数组
+   * Process array in batches
    * @template T
-   * @param {T[]} arr - 原始数组
-   * @param {number} size - 每批大小
-   * @returns {T[][]} 分批后的数组
+   * @param arr - Original array
+   * @param size - Batch size
+   * @returns Batched arrays
    */
   chunk: <T>(arr: T[], size: number): T[][] => {
     const result: T[][] = []
@@ -250,14 +250,14 @@ export const arrayUtils = {
 }
 
 /**
- * 时间工具函数
+ * Time utility functions
  */
 export const timeUtils = {
   /**
-   * 格式化时间戳
-   * @param {number} timestamp - 时间戳
-   * @param {string} [format=YYYY-MM-DD HH:mm:ss] - 格式化模板
-   * @returns {string} 格式化后的时间字符串
+   * Format timestamp
+   * @param timestamp - Timestamp
+   * @param format - Format template
+   * @returns Formatted time string
    */
   format: (timestamp: number, format: string = 'YYYY-MM-DD HH:mm:ss'): string => {
     const date = new Date(timestamp)
@@ -278,11 +278,11 @@ export const timeUtils = {
   },
 
   /**
-   * 计算时间差
-   * @param {number} start - 开始时间戳
-   * @param {number} end - 结束时间戳
-   * @param {('ms'|'s'|'m'|'h'|'d')} [unit=ms] - 时间单位
-   * @returns {number} 时间差
+   * Calculate time difference
+   * @param start - Start timestamp
+   * @param end - End timestamp
+   * @param unit - Time unit
+   * @returns Time difference
    */
   diff: (start: number, end: number, unit: 'ms' | 's' | 'm' | 'h' | 'd' = 'ms'): number => {
     const diff = end - start
@@ -302,17 +302,17 @@ export const timeUtils = {
 }
 
 /**
- * 环境工具函数
+ * Environment utility functions
  */
 
 /**
- * 检查是否在浏览器环境中
- * @returns {boolean} 是否在浏览器环境中
+ * Check if running in browser environment
+ * @returns Whether running in browser environment
  */
 export const isBrowser = () => typeof window !== "undefined"
 
 /**
- * 获取当前时间戳
- * @returns {number} 当前时间戳
+ * Get current timestamp
+ * @returns Current timestamp
  */
 export const now = () => Date.now()

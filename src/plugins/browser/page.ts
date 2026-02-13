@@ -1,5 +1,10 @@
 import { isBrowser } from "../../utils";
 
+/**
+ * Gets information about the current page
+ * @returns An object containing page information including URL, pathname, hostname, etc.
+ * Returns default/empty values if not in a browser environment
+ */
 export function getPageInfo(): {
   current_url: string;
   pathname: string;
@@ -54,6 +59,11 @@ export function getPageInfo(): {
   };
 }
 
+/**
+ * Gets the current scroll position of the page
+ * @returns An object containing scroll_x and scroll_y coordinates
+ * Returns zeros if not in a browser environment
+ */
 export function getScrollInfo(): {
   scroll_x: number;
   scroll_y: number;

@@ -1,6 +1,6 @@
 /**
- * 网络插件
- * 负责监控和跟踪网络请求，包括XMLHttpRequest和fetch请求
+ * Network plugin
+ * Responsible for monitoring and tracking network requests, including XMLHttpRequest and fetch requests
  */
 
 import { track, state } from "../core";
@@ -8,27 +8,27 @@ import type { IPlugin, IPluginContext } from "../types";
 import { isBrowser } from "../utils";
 
 /**
- * 扩展XMLHttpRequest接口，添加自定义属性
+ * Extended XMLHttpRequest interface with custom properties
  */
 interface XMLHttpRequestWithCustomProps extends XMLHttpRequest {
   /**
-   * 请求开始时间
+   * Request start time
    */
   _requestStartTime?: number;
   /**
-   * 请求方法
+   * Request method
    */
   _requestMethod?: string;
   /**
-   * 请求URL
+   * Request URL
    */
   _requestUrl?: string | URL;
 }
 
 /**
- * 检查URL是否是SDK自身的上报接口
- * @param url 要检查的URL
- * @returns 是否是SDK自身的上报接口
+ * Check if URL is SDK's own reporting endpoint
+ * @param url URL to check
+ * @returns Whether it's SDK's own reporting endpoint
  */
 function isSdkEndpoint(url: string): boolean {
   try {
@@ -38,7 +38,7 @@ function isSdkEndpoint(url: string): boolean {
     const sdkUrl = new URL(options.endpoint);
     const requestUrl = new URL(url, window.location.origin);
 
-    // 比较协议、主机和路径
+    // Compare protocol, host, and path
     return (
       sdkUrl.protocol === requestUrl.protocol &&
       sdkUrl.host === requestUrl.host &&
@@ -50,7 +50,7 @@ function isSdkEndpoint(url: string): boolean {
 }
 
 /**
- * 补丁XMLHttpRequest，监控网络请求
+ * Patch XMLHttpRequest to monitor network requests
  */
 function patchXMLHttpRequest() {
   if (!isBrowser() || !window.XMLHttpRequest) return;
@@ -87,7 +87,7 @@ function patchXMLHttpRequest() {
     this.addEventListener("load", function () {
       try {
         const url = xhr._requestUrl?.toString() || "";
-        // 排除SDK自身的上报接口
+        // Exclude SDK's own reporting endpoint
         if (isSdkEndpoint(url)) return;
 
         const duration = Date.now() - (xhr._requestStartTime || Date.now());
@@ -101,14 +101,14 @@ function patchXMLHttpRequest() {
           success: xhr.status >= 200 && xhr.status < 300,
         });
       } catch {
-        // 忽略错误，避免无限循环
+        // Ignore errors to avoid infinite loops
       }
     });
 
     this.addEventListener("error", function () {
       try {
         const url = xhr._requestUrl?.toString() || "";
-        // 排除SDK自身的上报接口
+        // Exclude SDK's own reporting endpoint
         if (isSdkEndpoint(url)) return;
 
         const duration = Date.now() - (xhr._requestStartTime || Date.now());
@@ -122,14 +122,14 @@ function patchXMLHttpRequest() {
           success: false,
         });
       } catch {
-        // 忽略错误，避免无限循环
+        // Ignore errors to avoid infinite loops
       }
     });
 
     this.addEventListener("abort", function () {
       try {
         const url = xhr._requestUrl?.toString() || "";
-        // 排除SDK自身的上报接口
+        // Exclude SDK's own reporting endpoint
         if (isSdkEndpoint(url)) return;
 
         const duration = Date.now() - (xhr._requestStartTime || Date.now());
@@ -143,7 +143,7 @@ function patchXMLHttpRequest() {
           success: false,
         });
       } catch {
-        // 忽略错误，避免无限循环
+        // Ignore errors to avoid infinite loops
       }
     });
 
@@ -152,7 +152,7 @@ function patchXMLHttpRequest() {
 }
 
 /**
- * 补丁fetch，监控网络请求
+ * Patch fetch to monitor network requests
  */
 function patchFetch() {
   if (!isBrowser() || !window.fetch) return;
@@ -165,7 +165,7 @@ function patchFetch() {
     const options = args[1] || {};
     const method = options.method || "GET";
 
-    // 排除SDK自身的上报接口
+    // Exclude SDK's own reporting endpoint
     if (isSdkEndpoint(url)) {
       return originalFetch.apply(this, args);
     }
@@ -204,24 +204,24 @@ function patchFetch() {
 }
 
 /**
- * 网络插件
+ * Network plugin
  */
 export const networkPlugin: IPlugin = {
   /**
-   * 插件名称
+   * Plugin name
    */
   name: "network",
 
   /**
-   * 插件设置方法
+   * Plugin setup method
    */
   setup(_context: IPluginContext) {
     if (!isBrowser()) return;
 
-    // 补丁 XMLHttpRequest
+    // Patch XMLHttpRequest
     patchXMLHttpRequest();
 
-    // 补丁 fetch
+    // Patch fetch
     patchFetch();
   },
 };

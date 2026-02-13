@@ -1,5 +1,5 @@
 /**
- * 错误处理器实现
+ * Error handler implementation
  */
 import { state } from "../core";
 import {
@@ -11,24 +11,24 @@ import {
 } from "./types";
 
 /**
- * 错误处理类
- * 负责捕获、记录和处理错误
+ * Error handler class
+ * Responsible for capturing, recording, and handling errors
  */
 export class ErrorHandler {
   /**
-   * 配置
+   * Configuration
    * @private
    */
   private config: ErrorHandlerConfig;
 
   /**
-   * 错误队列
+   * Error queue
    * @private
    */
   private errors: TraceError[] = [];
 
   /**
-   * 错误统计
+   * Error statistics
    * @private
    */
   private stats: ErrorStats = {
@@ -46,14 +46,14 @@ export class ErrorHandler {
   };
 
   /**
-   * 错误时间戳列表
+   * Error timestamp list
    * @private
    */
   private errorTimestamps: number[] = [];
 
   /**
-   * 构造函数
-   * @param {Partial<ErrorHandlerConfig>} [config] - 配置选项
+   * Constructor
+   * @param config - Configuration options
    */
   constructor(config?: Partial<ErrorHandlerConfig>) {
     this.config = {
@@ -63,16 +63,16 @@ export class ErrorHandler {
       ...config,
     };
 
-    // 初始化错误统计
+    // Initialize error statistics
     this.initStats();
   }
 
   /**
-   * 初始化错误统计
+   * Initialize error statistics
    * @private
    */
   private initStats(): void {
-    // 初始化按类型统计
+    // Initialize statistics by type
     const errorTypes: ErrorType[] = [
       "network",
       "network:timeout",
@@ -106,7 +106,7 @@ export class ErrorHandler {
       this.stats.byType[type] = 0;
     });
 
-    // 初始化按级别统计
+    // Initialize statistics by level
     const errorLevels: ErrorLevel[] = [
       "debug",
       "info",
@@ -120,9 +120,9 @@ export class ErrorHandler {
   }
 
   /**
-   * 生成错误ID
+   * Generate error ID
    * @private
-   * @returns {string} 错误ID
+   * @returns Error ID
    */
   private generateErrorId(): string {
     return (
@@ -131,10 +131,10 @@ export class ErrorHandler {
   }
 
   /**
-   * 解析错误堆栈
+   * Parse error stack
    * @private
-   * @param {string} stack - 错误堆栈
-   * @returns {Object} 解析结果
+   * @param stack - Error stack
+   * @returns Parsed result
    */
   private parseStack(stack: string): { file?: string; line?: number } {
     const stackLines = stack.split("\n");
@@ -151,47 +151,47 @@ export class ErrorHandler {
   }
 
   /**
-   * 更新错误统计
+   * Update error statistics
    * @private
-   * @param {TraceError} error - 错误对象
+   * @param error - Error object
    */
   private updateStats(error: TraceError): void {
-    // 更新总错误数
+    // Update total error count
     this.stats.total++;
 
-    // 更新按类型统计
+    // Update statistics by type
     this.stats.byType[error.type] = (this.stats.byType[error.type] || 0) + 1;
 
-    // 更新按级别统计
+    // Update statistics by level
     this.stats.byLevel[error.level] =
       (this.stats.byLevel[error.level] || 0) + 1;
 
-    // 更新按代码统计
+    // Update statistics by code
     if (error.code) {
       this.stats.byCode[error.code] = (this.stats.byCode[error.code] || 0) + 1;
     }
 
-    // 更新最后错误时间
+    // Update last error time
     this.stats.lastError = error.timestamp;
 
-    // 更新错误时间戳列表
+    // Update error timestamp list
     this.errorTimestamps.push(error.timestamp);
 
-    // 清理过期的时间戳（只保留最近一小时的）
+    // Clean up expired timestamps (keep only the last hour)
     const oneHourAgo = Date.now() - 60 * 60 * 1000;
     this.errorTimestamps = this.errorTimestamps.filter((ts) => ts > oneHourAgo);
 
-    // 更新错误率
+    // Update error rate
     const oneMinuteAgo = Date.now() - 60 * 1000;
     this.stats.rate.lastMinute = this.errorTimestamps.filter(
       (ts) => ts > oneMinuteAgo,
     ).length;
     this.stats.rate.lastHour = this.errorTimestamps.length;
 
-    // 更新连续错误数
+    // Update consecutive error count
     const timeSinceLastError = error.timestamp - this.stats.lastError;
     if (timeSinceLastError < 5000) {
-      // 5秒内的错误视为连续错误
+      // Errors within 5 seconds are considered consecutive
       this.stats.consecutiveErrors++;
       if (this.stats.consecutiveErrors > this.stats.maxConsecutiveErrors) {
         this.stats.maxConsecutiveErrors = this.stats.consecutiveErrors;
@@ -202,14 +202,14 @@ export class ErrorHandler {
   }
 
   /**
-   * 记录错误
-   * @param {ErrorType} type - 错误类型
-   * @param {string} message - 错误消息
-   * @param {unknown} [error] - 原始错误对象
-   * @param {Record<string, unknown>} [context] - 错误上下文
-   * @param {ErrorLevel} [level=error] - 错误级别
-   * @param {string} [code] - 错误代码
-   * @param {string} [source] - 错误来源
+   * Record error
+   * @param type - Error type
+   * @param message - Error message
+   * @param error - Original error object
+   * @param context - Error context
+   * @param level - Error level
+   * @param code - Error code
+   * @param source - Error source
    */
   public captureError(
     type: ErrorType,
@@ -237,7 +237,7 @@ export class ErrorHandler {
       return dummyError;
     }
 
-    // 解析错误堆栈
+    // Parse error stack
     let file: string | undefined;
     let line: number | undefined;
     if (errorObj?.stack) {
@@ -246,7 +246,7 @@ export class ErrorHandler {
       line = stackInfo.line;
     }
 
-    // 创建错误对象
+    // Create error object
     const traceError: TraceError = {
       type,
       level,
@@ -265,35 +265,35 @@ export class ErrorHandler {
       deviceId: context?.deviceId as string | undefined,
     };
 
-    // 添加到错误队列
+    // Add to error queue
     this.errors.push(traceError);
 
-    // 限制错误队列大小
+    // Limit error queue size
     if (this.errors.length > this.config.maxErrors) {
       this.errors.shift();
     }
 
-    // 更新错误统计
+    // Update error statistics
     this.updateStats(traceError);
 
-    // 记录错误日志
+    // Log error
     this.logError(traceError);
 
-    // 检查错误率是否过高
+    // Check if error rate is too high
     this.checkErrorRate(traceError);
 
     return traceError;
   }
 
   /**
-   * 检查错误率
+   * Check error rate
    * @private
-   * @param {TraceError} error - 错误对象
+   * @param error - Error object
    */
   private checkErrorRate(error: TraceError): void {
-    // 检查错误率是否过高
+    // Check if error rate is too high
     if (this.stats.rate.lastMinute > 10) {
-      // 每分钟超过10个错误，可能存在问题
+      // More than 10 errors per minute, there may be a problem
       if (typeof console !== "undefined") {
         console.warn("[Node-Trace] High error rate detected:", {
           errorsPerMinute: this.stats.rate.lastMinute,
@@ -303,9 +303,9 @@ export class ErrorHandler {
       }
     }
 
-    // 检查连续错误数
+    // Check consecutive error count
     if (this.stats.consecutiveErrors > 5) {
-      // 连续超过5个错误，可能存在严重问题
+      // More than 5 consecutive errors, there may be a serious problem
       if (typeof console !== "undefined") {
         console.error("[Node-Trace] Critical error sequence detected:", {
           consecutiveErrors: this.stats.consecutiveErrors,
@@ -317,9 +317,9 @@ export class ErrorHandler {
   }
 
   /**
-   * 记录错误日志
+   * Log error
    * @private
-   * @param {TraceError} error - 错误对象
+   * @param error - Error object
    */
   private logError(error: TraceError): void {
     const debugEnabled = state.options?.debug || false;
@@ -367,8 +367,8 @@ export class ErrorHandler {
   }
 
   /**
-   * 获取错误统计
-   * @returns {ErrorStats} 错误统计信息
+   * Get error statistics
+   * @returns Error statistics information
    */
   public getStats(): ErrorStats {
     return {
@@ -377,25 +377,25 @@ export class ErrorHandler {
   }
 
   /**
-   * 获取最近的错误
-   * @param {number} [count=10] - 错误数量
-   * @returns {TraceError[]} 最近的错误列表
+   * Get recent errors
+   * @param count - Number of errors
+   * @returns List of recent errors
    */
   public getRecentErrors(count: number = 10): TraceError[] {
     return this.errors.slice(-count);
   }
 
   /**
-   * 检查是否有错误
-   * @returns {boolean} 是否有错误
+   * Check if there are errors
+   * @returns Whether there are errors
    */
   public hasErrors(): boolean {
     return this.errors.length > 0;
   }
 
   /**
-   * 获取错误摘要
-   * @returns {ErrorSummary} 错误摘要
+   * Get error summary
+   * @returns Error summary
    */
   public getErrorSummary(): {
     total: number;
@@ -420,7 +420,7 @@ export class ErrorHandler {
       };
     }
 
-    // 找到最频繁的错误类型
+    // Find most frequent error type
     let mostFrequentType: ErrorType | null = null;
     let maxTypeCount = 0;
     Object.entries(this.stats.byType).forEach(([type, count]) => {
@@ -430,7 +430,7 @@ export class ErrorHandler {
       }
     });
 
-    // 找到最频繁的错误级别
+    // Find most frequent error level
     let mostFrequentLevel: ErrorLevel | null = null;
     let maxLevelCount = 0;
     Object.entries(this.stats.byLevel).forEach(([level, count]) => {
@@ -453,10 +453,10 @@ export class ErrorHandler {
   }
 
   /**
-   * 检查是否应该记录该级别的错误
+   * Check if this error level should be logged
    * @private
-   * @param {ErrorLevel} level - 错误级别
-   * @returns {boolean} 是否应该记录
+   * @param level - Error level
+   * @returns Whether to log
    */
   private shouldLog(level: ErrorLevel): boolean {
     const levelOrder = ["debug", "info", "warn", "error", "fatal"];
@@ -466,24 +466,24 @@ export class ErrorHandler {
   }
 
   /**
-   * 获取错误队列
-   * @returns {TraceError[]} 错误队列
+   * Get error queue
+   * @returns Error queue
    */
   public getErrors(): TraceError[] {
     return [...this.errors];
   }
 
   /**
-   * 清空错误队列
+   * Clear error queue
    */
   public clearErrors(): void {
     this.errors = [];
   }
 
   /**
-   * 处理网络错误
-   * @param {unknown} error - 错误对象
-   * @param {Record<string, unknown>} [context] - 错误上下文
+   * Handle network error
+   * @param error - Error object
+   * @param context - Error context
    */
   public handleNetworkError(
     error: unknown,
@@ -493,9 +493,9 @@ export class ErrorHandler {
   }
 
   /**
-   * 处理存储错误
-   * @param {unknown} error - 错误对象
-   * @param {Record<string, unknown>} [context] - 错误上下文
+   * Handle storage error
+   * @param error - Error object
+   * @param context - Error context
    */
   public handleStorageError(
     error: unknown,
@@ -511,9 +511,9 @@ export class ErrorHandler {
   }
 
   /**
-   * 处理浏览器 API 错误
-   * @param {unknown} error - 错误对象
-   * @param {Record<string, unknown>} [context] - 错误上下文
+   * Handle browser API error
+   * @param error - Error object
+   * @param context - Error context
    */
   public handleBrowserError(
     error: unknown,
@@ -529,9 +529,9 @@ export class ErrorHandler {
   }
 
   /**
-   * 处理插件错误
-   * @param {unknown} error - 错误对象
-   * @param {Record<string, unknown>} [context] - 错误上下文
+   * Handle plugin error
+   * @param error - Error object
+   * @param context - Error context
    */
   public handlePluginError(
     error: unknown,
@@ -541,9 +541,9 @@ export class ErrorHandler {
   }
 
   /**
-   * 处理队列错误
-   * @param {unknown} error - 错误对象
-   * @param {Record<string, unknown>} [context] - 错误上下文
+   * Handle queue error
+   * @param error - Error object
+   * @param context - Error context
    */
   public handleQueueError(
     error: unknown,
@@ -553,9 +553,9 @@ export class ErrorHandler {
   }
 
   /**
-   * 处理设备 ID 错误
-   * @param {unknown} error - 错误对象
-   * @param {Record<string, unknown>} [context] - 错误上下文
+   * Handle device ID error
+   * @param error - Error object
+   * @param context - Error context
    */
   public handleDeviceError(
     error: unknown,
@@ -571,9 +571,9 @@ export class ErrorHandler {
   }
 
   /**
-   * 处理会话错误
-   * @param {unknown} error - 错误对象
-   * @param {Record<string, unknown>} [context] - 错误上下文
+   * Handle session error
+   * @param error - Error object
+   * @param context - Error context
    */
   public handleSessionError(
     error: unknown,
@@ -589,9 +589,9 @@ export class ErrorHandler {
   }
 
   /**
-   * 处理行为错误
-   * @param {unknown} error - 错误对象
-   * @param {Record<string, unknown>} [context] - 错误上下文
+   * Handle behavior error
+   * @param error - Error object
+   * @param context - Error context
    */
   public handleBehaviorError(
     error: unknown,
@@ -607,9 +607,9 @@ export class ErrorHandler {
   }
 
   /**
-   * 处理数据错误
-   * @param {unknown} error - 错误对象
-   * @param {Record<string, unknown>} [context] - 错误上下文
+   * Handle data error
+   * @param error - Error object
+   * @param context - Error context
    */
   public handleDataError(
     error: unknown,
@@ -619,9 +619,9 @@ export class ErrorHandler {
   }
 
   /**
-   * 处理未知错误
-   * @param {unknown} error - 错误对象
-   * @param {Record<string, unknown>} [context] - 错误上下文
+   * Handle unknown error
+   * @param error - Error object
+   * @param context - Error context
    */
   public handleUnknownError(
     error: unknown,

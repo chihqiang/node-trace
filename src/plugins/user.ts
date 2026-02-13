@@ -1,6 +1,6 @@
 /**
- * 用户管理插件
- * 负责设备ID和用户ID的生成、存储和管理
+ * User management plugin
+ * Responsible for device ID and user ID generation, storage, and management
  */
 
 import { isBrowser } from "../utils";
@@ -9,41 +9,41 @@ import { storageUtils } from "./browser";
 import type { IPlugin, EventProperties, Payload } from "../types";
 
 /**
- * 设备ID存储键
+ * Device ID storage key
  */
 const DEVICE_ID_KEY = "__analytics_device_id__";
 
 /**
- * 用户ID存储键
+ * User ID storage key
  */
 const USER_ID_KEY = "__analytics_user_id__";
 
 /**
- * 存储非浏览器环境的设备 ID
+ * Stores device ID for non-browser environments
  */
 let nonBrowserDeviceId: string | null = null;
 
 /**
- * 缓存浏览器设备ID
+ * Caches browser device ID
  */
 let cachedBrowserDeviceId: string | null = null;
 
 /**
- * 默认设备ID长度
+ * Default device ID length
  */
 const DEFAULT_DEVICE_ID_LENGTH = 32;
 
 /**
- * 扩展的 Navigator 接口
+ * Extended Navigator interface
  */
 interface ExtendedNavigator extends Navigator {
   deviceMemory?: number;
 }
 
 /**
- * 生成SHA-256哈希
- * @param input - 输入字符串
- * @returns SHA-256哈希值
+ * Generates SHA-256 hash
+ * @param input - Input string
+ * @returns SHA-256 hash value
  */
 async function generateSHA256Hash(input: string): Promise<string> {
   if (isBrowser() && typeof crypto !== "undefined" && crypto.subtle) {
@@ -65,9 +65,9 @@ async function generateSHA256Hash(input: string): Promise<string> {
 }
 
 /**
- * 改进的哈希函数（使用 FNV-1a 算法）
- * @param input - 输入字符串
- * @returns 哈希值
+ * Improved hash function (using FNV-1a algorithm)
+ * @param input - Input string
+ * @returns Hash value
  */
 function improvedHash(input: string): string {
   const FNV_PRIME = 0x01000193;
@@ -91,8 +91,8 @@ function improvedHash(input: string): string {
 }
 
 /**
- * 收集浏览器指纹信息
- * @returns 浏览器指纹信息字符串
+ * Collects browser fingerprint information
+ * @returns Browser fingerprint information string
  */
 function collectBrowserFingerprint(): string {
   if (!isBrowser()) {
@@ -126,8 +126,8 @@ function collectBrowserFingerprint(): string {
 }
 
 /**
- * 同步版本的设备ID生成
- * @returns 设备ID
+ * Synchronous version of device ID generation
+ * @returns Device ID
  */
 function generateStableDeviceIdSync(): string {
   if (!isBrowser()) {
@@ -159,8 +159,8 @@ function generateStableDeviceIdSync(): string {
 }
 
 /**
- * 异步版本的设备ID生成
- * @returns 设备ID
+ * Asynchronous version of device ID generation
+ * @returns Device ID
  */
 async function generateDeviceIdAsync(): Promise<string> {
   if (!isBrowser()) {
@@ -184,24 +184,24 @@ async function generateDeviceIdAsync(): Promise<string> {
 }
 
 /**
- * 设备ID生成函数（同步）
- * @returns 设备ID
+ * Device ID generation function (synchronous)
+ * @returns Device ID
  */
 function generateStableDeviceId(): string {
   return generateStableDeviceIdSync();
 }
 
 /**
- * 异步版本的设备ID生成
- * @returns 设备ID
+ * Asynchronous version of device ID generation
+ * @returns Device ID
  */
 export async function generateStableDeviceIdAsync(): Promise<string> {
   return generateDeviceIdAsync();
 }
 
 /**
- * 获取设备ID
- * @returns 设备ID
+ * Gets device ID
+ * @returns Device ID
  */
 export function getDeviceId(): string {
   if (!isBrowser()) {
@@ -225,8 +225,8 @@ export function getDeviceId(): string {
 }
 
 /**
- * 设置用户ID
- * @param id - 用户ID
+ * Sets user ID
+ * @param id - User ID
  */
 export function setID(id: string): void {
   if (!isBrowser()) {
@@ -243,8 +243,8 @@ export function setID(id: string): void {
 }
 
 /**
- * 获取用户ID
- * @returns 用户ID
+ * Gets user ID
+ * @returns User ID
  */
 export function getID(): string {
   if (!isBrowser()) {
@@ -259,7 +259,7 @@ export function getID(): string {
 }
 
 /**
- * 清除用户ID
+ * Clears user ID
  */
 export function clearID(): void {
   if (!isBrowser()) {
@@ -276,7 +276,7 @@ export function clearID(): void {
 }
 
 /**
- * 用户插件
+ * User plugin
  */
 export const userPlugin: IPlugin = {
   name: "user",
@@ -286,7 +286,7 @@ export const userPlugin: IPlugin = {
   priority: 10,
 
   /**
-   * 事件跟踪前回调
+   * Event tracking callback
    */
   onTrack<T extends EventProperties>(payload: Payload<T>): Payload<T> {
     return {
@@ -297,7 +297,7 @@ export const userPlugin: IPlugin = {
   },
 
   /**
-   * 获取插件信息
+   * Gets plugin information
    */
   getInfo(): Record<string, unknown> {
     return {

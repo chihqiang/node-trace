@@ -1,5 +1,9 @@
 import { isBrowser } from "../../utils";
 
+/**
+ * Gets screen information
+ * @returns An object containing screen-related information
+ */
 export function getScreenInfo(): {
   screen_width: number;
   screen_height: number;

@@ -8,7 +8,7 @@ import { DB } from "../db";
 import { isBrowser } from "../utils";
 
 /**
- * 队列统计信息
+ * Queue statistics
  */
 export interface QueueStats {
   totalEvents: number;
@@ -19,7 +19,7 @@ export interface QueueStats {
 }
 
 /**
- * 队列配置
+ * Queue configuration
  */
 export interface QueueConfig {
   maxQueueSize: number;
@@ -37,7 +37,7 @@ export interface QueueConfig {
 }
 
 /**
- * 队列管理器
+ * Queue manager
  */
 export class QueueManager {
   private queue: Payload<EventProperties>[];
@@ -65,7 +65,7 @@ export class QueueManager {
   }
 
   /**
-   * 初始化队列
+   * Initialize queue
    */
   init(config: QueueConfig): void {
     this.config = config;
@@ -73,7 +73,7 @@ export class QueueManager {
   }
 
   /**
-   * 计算队列压力 (0-1)
+   * Calculate queue pressure (0-1)
    */
   private calculatePressure(): number {
     if (!this.config) return 0;
@@ -81,7 +81,7 @@ export class QueueManager {
   }
 
   /**
-   * 获取动态批量大小
+   * Get dynamic batch size
    */
   private getDynamicBatchSize(): number {
     if (!this.config) return QUEUE_CONSTANTS.DEFAULT_BATCH_SIZE;
@@ -105,7 +105,7 @@ export class QueueManager {
   }
 
   /**
-   * 获取动态发送间隔
+   * Get dynamic send interval
    */
   private getDynamicInterval(): number {
     if (!this.config) return QUEUE_CONSTANTS.DEFAULT_BATCH_INTERVAL;
@@ -123,7 +123,7 @@ export class QueueManager {
   }
 
   /**
-   * 处理队列满的情况
+   * Handle queue full scenario
    */
   private handleQueueFull(): void {
     if (!this.config) return;
@@ -149,7 +149,7 @@ export class QueueManager {
   }
 
   /**
-   * 推送事件到队列
+   * Push event to queue
    */
   push<T extends EventProperties>(event: Payload<T>): void {
     if (this.dedupe.exists(event)) {
@@ -190,7 +190,7 @@ export class QueueManager {
   }
 
   /**
-   * 调度发送任务
+   * Schedule send task
    */
   private schedule(): void {
     if (this.timer) return;
@@ -202,7 +202,7 @@ export class QueueManager {
   }
 
   /**
-   * 更新发送统计
+   * Update send statistics
    */
   private updateStats(sendTime: number, success: boolean): void {
     this.stats.lastSendTime = Date.now();
@@ -221,7 +221,7 @@ export class QueueManager {
   }
 
   /**
-   * 处理发送失败
+   * Handle send failure
    */
   private async handleSendFailure(
     batch: Payload<EventProperties>[],
@@ -261,7 +261,7 @@ export class QueueManager {
   }
 
   /**
-   * 处理发送成功
+   * Handle send success
    */
   private async handleSendSuccess(
     batch: Payload<EventProperties>[],
@@ -276,7 +276,7 @@ export class QueueManager {
   }
 
   /**
-   * 调用插件的 beforeSend 钩子
+   * Apply plugin beforeSend hooks
    */
   private applyBeforeSendHooks(
     batch: Payload<EventProperties>[],
@@ -301,7 +301,7 @@ export class QueueManager {
   }
 
   /**
-   * 调用插件的 afterSend 钩子
+   * Apply plugin afterSend hooks
    */
   private applyAfterSendHooks(
     batch: Payload<EventProperties>[],
@@ -324,7 +324,7 @@ export class QueueManager {
   }
 
   /**
-   * 发送队列中的事件
+   * Send events in queue
    */
   async flush(): Promise<void> {
     if (!this.config || this.queue.length === 0) {
@@ -362,7 +362,7 @@ export class QueueManager {
   }
 
   /**
-   * 启动离线事件检查
+   * Start offline event check
    */
   private startOfflineCheck(): void {
     if (!isBrowser() || this.offlineCheckTimer) {
@@ -379,7 +379,7 @@ export class QueueManager {
   }
 
   /**
-   * 恢复离线事件
+   * Restore offline events
    */
   async restoreOfflineEvents(): Promise<void> {
     if (!isBrowser()) return;
@@ -434,7 +434,7 @@ export class QueueManager {
   }
 
   /**
-   * 清除所有定时器
+   * Clear all timers
    */
   clearTimers(): void {
     if (this.timer) {
@@ -452,21 +452,21 @@ export class QueueManager {
   }
 
   /**
-   * 获取队列统计信息
+   * Get queue statistics
    */
   getStats(): QueueStats {
     return { ...this.stats };
   }
 
   /**
-   * 获取队列长度
+   * Get queue length
    */
   length(): number {
     return this.queue.length;
   }
 
   /**
-   * 清空队列
+   * Clear queue
    */
   clear(): void {
     this.queue = [];
@@ -475,6 +475,6 @@ export class QueueManager {
 }
 
 /**
- * 队列管理器实例
+ * Queue manager instance
  */
 export const queueManager = new QueueManager();

@@ -1,6 +1,6 @@
 /**
- * 页面浏览插件
- * 负责监控和跟踪页面浏览事件，包括初始加载和路由变化
+ * Page view plugin
+ * Responsible for monitoring and tracking page view events, including initial load and route changes
  */
 
 import { track } from "../core";
@@ -9,13 +9,13 @@ import type { IPlugin, IPluginContext } from "../types";
 import { isBrowser } from "../utils";
 
 /**
- * 发送页面浏览事件
+ * Send page view event
  */
 function sendPageView() {
   if (!isBrowser()) return;
 
   try {
-    // 页面浏览事件会通过插件系统自动触发会话和行为更新
+    // Page view event will automatically trigger session and behavior updates through plugin system
     const browserData = getBrowserData();
     track("page_view", {
       ...browserData,
@@ -25,20 +25,20 @@ function sendPageView() {
       title: document.title,
     });
   } catch {
-    // 忽略错误，避免无限循环
+    // Ignore errors to avoid infinite loops
   }
 }
 
 /**
- * 监听路由变化
+ * Listen for route changes
  */
 function listenForRouteChanges() {
   if (!isBrowser()) return;
 
-  // 监听 hash 变化
+  // Listen for hash changes
   window.addEventListener("hashchange", sendPageView);
 
-  // 监听 history 变化
+  // Listen for history changes
   const originalPushState = history.pushState;
   const originalReplaceState = history.replaceState;
 
@@ -52,26 +52,26 @@ function listenForRouteChanges() {
     sendPageView();
   };
 
-  // 监听前进/后退按钮
+  // Listen for forward/back buttons
   window.addEventListener("popstate", sendPageView);
 }
 
 /**
- * 页面浏览插件
+ * Page view plugin
  */
 export const pageviewPlugin: IPlugin = {
   /**
-   * 插件名称
+   * Plugin name
    */
   name: "pageview",
 
   /**
-   * 插件依赖
+   * Plugin dependencies
    */
   dependencies: ["session", "behavior"],
 
   /**
-   * 插件设置方法
+   * Plugin setup method
    */
   setup(context: IPluginContext) {
     if (!isBrowser()) return;

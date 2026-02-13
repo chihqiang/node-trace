@@ -1,129 +1,129 @@
 /**
- * 错误类型定义
+ * Error type definitions
  */
 
 /**
- * 错误类型
+ * Error types
  */
 export type ErrorType =
-  | "network" // 网络错误
-  | "network:timeout" // 网络超时错误
-  | "network:offline" // 离线错误
-  | "network:server" // 服务器错误
-  | "network:client" // 客户端错误
-  | "storage" // 存储错误
-  | "storage:quota" // 存储配额错误
-  | "storage:access" // 存储访问错误
-  | "browser" // 浏览器 API 错误
-  | "plugin" // 插件错误
-  | "plugin:init" // 插件初始化错误
-  | "plugin:execute" // 插件执行错误
-  | "queue" // 队列错误
-  | "queue:full" // 队列满错误
-  | "queue:overflow" // 队列溢出错误
-  | "device" // 设备 ID 错误
-  | "session" // 会话错误
-  | "session:timeout" // 会话超时错误
-  | "behavior" // 行为错误
-  | "data" // 数据处理错误
-  | "data:validation" // 数据验证错误
-  | "data:serialization" // 数据序列化错误
-  | "config" // 配置错误
-  | "init" // 初始化错误
-  | "runtime" // 运行时错误
-  | "unknown"; // 未知错误
+  | "network" // Network error
+  | "network:timeout" // Network timeout error
+  | "network:offline" // Offline error
+  | "network:server" // Server error
+  | "network:client" // Client error
+  | "storage" // Storage error
+  | "storage:quota" // Storage quota error
+  | "storage:access" // Storage access error
+  | "browser" // Browser API error
+  | "plugin" // Plugin error
+  | "plugin:init" // Plugin initialization error
+  | "plugin:execute" // Plugin execution error
+  | "queue" // Queue error
+  | "queue:full" // Queue full error
+  | "queue:overflow" // Queue overflow error
+  | "device" // Device ID error
+  | "session" // Session error
+  | "session:timeout" // Session timeout error
+  | "behavior" // Behavior error
+  | "data" // Data processing error
+  | "data:validation" // Data validation error
+  | "data:serialization" // Data serialization error
+  | "config" // Configuration error
+  | "init" // Initialization error
+  | "runtime" // Runtime error
+  | "unknown"; // Unknown error
 
 /**
- * 错误级别
+ * Error levels
  */
 export type ErrorLevel = "debug" | "info" | "warn" | "error" | "fatal";
 
 /**
- * 错误接口
+ * Error interface
  */
 export interface TraceError {
   /**
-   * 错误类型
+   * Error type
    */
   type: ErrorType;
   /**
-   * 错误级别
+   * Error level
    */
   level: ErrorLevel;
   /**
-   * 错误消息
+   * Error message
    */
   message: string;
   /**
-   * 错误代码
+   * Error code
    */
   code?: string;
   /**
-   * 错误堆栈
+   * Error stack
    */
   stack?: string;
   /**
-   * 错误上下文
+   * Error context
    */
   context?: Record<string, unknown>;
   /**
-   * 错误详情
+   * Error details
    */
   details?: Record<string, unknown>;
   /**
-   * 错误来源
+   * Error source
    */
   source?: string;
   /**
-   * 错误发生的文件
+   * File where error occurred
    */
   file?: string;
   /**
-   * 错误发生的行号
+   * Line number where error occurred
    */
   line?: number;
   /**
-   * 时间戳
+   * Timestamp
    */
   timestamp: number;
   /**
-   * 错误ID
+   * Error ID
    */
   id: string;
   /**
-   * 相关事件
+   * Related event
    */
   event?: string;
   /**
-   * 用户ID
+   * User ID
    */
   userId?: string;
   /**
-   * 设备ID
+   * Device ID
    */
   deviceId?: string;
 }
 
 /**
- * 错误处理配置
+ * Error handler configuration
  */
 export interface ErrorHandlerConfig {
   /**
-   * 是否捕获错误
+   * Whether to capture errors
    */
   capture: boolean;
   /**
-   * 日志级别
+   * Log level
    */
   logLevel: ErrorLevel;
   /**
-   * 最大错误数量
+   * Maximum number of errors
    */
   maxErrors: number;
 }
 
 /**
- * 错误统计接口
+ * Error statistics interface
  */
 export interface ErrorStats {
   total: number;
@@ -140,7 +140,7 @@ export interface ErrorStats {
 }
 
 /**
- * 错误摘要接口
+ * Error summary interface
  */
 export interface ErrorSummary {
   total: number;

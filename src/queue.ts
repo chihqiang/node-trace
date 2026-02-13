@@ -1,7 +1,7 @@
 /**
- * 队列管理模块
- * 负责事件的推送、调度、发送和离线缓存等功能
- * 重构为模块化架构，提高可维护性和可测试性
+ * Queue management module
+ * Responsible for event push, scheduling, sending, and offline caching
+ * Refactored to modular architecture for better maintainability and testability
  */
 
 import type { Payload, EventProperties } from './types'
@@ -9,37 +9,37 @@ import { queueManager } from './queue/manager'
 import { QUEUE_CONSTANTS } from './queue/constants'
 
 /**
- * 推送事件到队列
+ * Push event to queue
  * @template T
- * @param {Payload<T>} event - 事件数据
+ * @param event - Event data
  */
 export function push<T extends EventProperties>(event: Payload<T>) {
   queueManager.push(event)
 }
 
 /**
- * 发送队列中的事件
+ * Send events in queue
  */
 export async function flush() {
   await queueManager.flush()
 }
 
 /**
- * 清除所有定时器
+ * Clear all timers
  */
 export function clearTimers() {
   queueManager.clearTimers()
 }
 
 /**
- * 启动离线事件检查定时器
+ * Start offline event check timer
  */
 export function startOfflineCheckTimer() {
-  // 队列管理器会在 init 时启动离线检查
-  // 这里保留为空函数以保持向后兼容
+  // Queue manager will start offline check during init
+  // Keep as empty function for backward compatibility
 }
 
 /**
- * 导出队列常量
+ * Export queue constants
  */
 export { QUEUE_CONSTANTS }

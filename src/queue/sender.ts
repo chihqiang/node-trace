@@ -3,12 +3,12 @@ import { QUEUE_CONSTANTS } from "./constants";
 import { networkManager } from "./network";
 
 /**
- * 发送策略类型
+ * Send strategy type
  */
 export type SendStrategy = "beacon" | "fetch" | "xhr";
 
 /**
- * 发送结果
+ * Send result
  */
 export interface SendResult {
   success: boolean;
@@ -17,7 +17,7 @@ export interface SendResult {
 }
 
 /**
- * 发送选项
+ * Send options
  */
 export interface SendOptions {
   endpoint: string;
@@ -28,14 +28,14 @@ export interface SendOptions {
 }
 
 /**
- * 发送策略选择器
+ * Send strategy selector
  */
 export class SendStrategySelector {
   /**
-   * 选择发送策略
-   * @param _body - 已序列化的数据（保留用于未来扩展）
-   * @param bodySize - 数据大小
-   * @returns 发送策略
+   * Select send strategy
+   * @param _body - Serialized data (reserved for future extension)
+   * @param bodySize - Data size
+   * @returns Send strategy
    */
   select(_body: string, bodySize: number): SendStrategy {
     const networkType = networkManager.getType();
@@ -57,7 +57,7 @@ export class SendStrategySelector {
 }
 
 /**
- * 使用 Beacon API 发送数据
+ * Send data using Beacon API
  */
 async function sendWithBeacon(
   endpoint: string,
@@ -83,7 +83,7 @@ async function sendWithBeacon(
 }
 
 /**
- * 使用 Fetch API 发送数据
+ * Send data using Fetch API
  */
 async function sendWithFetch(
   endpoint: string,
@@ -121,7 +121,7 @@ async function sendWithFetch(
 }
 
 /**
- * 使用 XMLHttpRequest 发送数据（作为最终回退）
+ * Send data using XMLHttpRequest (as final fallback)
  */
 async function sendWithXHR(
   endpoint: string,
@@ -171,7 +171,7 @@ async function sendWithXHR(
 }
 
 /**
- * 发送器
+ * Sender
  */
 export class Sender {
   private strategySelector: SendStrategySelector;
@@ -181,9 +181,9 @@ export class Sender {
   }
 
   /**
-   * 发送数据
-   * @param options - 发送选项
-   * @returns 发送结果
+   * Send data
+   * @param options - Send options
+   * @returns Send result
    */
   async send(options: SendOptions): Promise<SendResult> {
     if (!isBrowser()) {
@@ -235,6 +235,6 @@ export class Sender {
 }
 
 /**
- * 发送器实例
+ * Sender instance
  */
 export const sender = new Sender();

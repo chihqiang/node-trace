@@ -1,17 +1,17 @@
 /**
- * 类型定义模块
- * 包含项目中使用的各种类型和接口定义
+ * Type definitions module
+ * Contains various type and interface definitions used in the project
  */
 
 /**
- * 事件属性类型
- * 键值对形式，值可以是字符串、数字、布尔值、null或undefined
+ * Event properties type
+ * Key-value pairs, values can be strings, numbers, booleans, null, or undefined
  */
 export type EventProperties = Record<string, string | number | boolean | null | undefined>
 
 /**
- * 扩展事件属性类型
- * 允许插件添加额外的字段
+ * Extended event properties type
+ * Allows plugins to add additional fields
  */
 export type ExtendedEventProperties = {
   device_id?: string
@@ -22,251 +22,251 @@ export type ExtendedEventProperties = {
 }
 
 /**
- * 泛型事件负载接口
- * @template T - 事件属性类型
+ * Generic event payload interface
+ * @template T - Event properties type
  */
 export interface Payload<T extends EventProperties = EventProperties> {
   /**
-   * 事件ID
+   * Event ID
    */
   id: string
   /**
-   * 事件名称
+   * Event name
    */
   event: string
   /**
-   * 事件属性
+   * Event properties
    */
   properties?: T
   /**
-   * 事件时间戳
+   * Event timestamp
    */
   timestamp: number
   /**
-   * 扩展参数
+   * Extended parameters
    */
   [key: string]: unknown
 }
 
 /**
- * 配置选项接口
+ * Configuration options interface
  */
 export interface Options {
   /**
-   * 应用ID
+   * Application ID
    */
   appId: string
   /**
-   * 应用密钥
+   * Application key
    */
   appKey?: string
   /**
-   * 事件发送端点
+   * Event sending endpoint
    */
   endpoint: string
   /**
-   * 是否开启调试模式
+   * Whether to enable debug mode
    */
   debug?: boolean
 
   /**
-   * 事件采样率（0-1）
+   * Event sampling rate (0-1)
    */
   sampleRate?: number
   /**
-   * 事件黑名单
+   * Event blacklist
    */
   blacklist?: string[]
   /**
-   * 事件白名单
+   * Event whitelist
    */
   whitelist?: string[]
 
   /**
-   * 批量发送大小
+   * Batch send size
    */
   batchSize?: number
   /**
-   * 批量发送间隔（毫秒）
+   * Batch send interval (milliseconds)
    */
   batchInterval?: number
 
   /**
-   * 是否启用离线缓存
+   * Whether to enable offline cache
    */
   offlineEnabled?: boolean
   /**
-   * 最大队列大小
+   * Maximum queue size
    */
   maxQueueSize?: number
 
   /**
-   * 重试次数
+   * Retry count
    */
   retryCount?: number
   /**
-   * 重试间隔（毫秒）
+   * Retry interval (milliseconds)
    */
   retryInterval?: number
 
   /**
-   * 请求头
+   * Request headers
    */
   headers?: Record<string, string>
   /**
-   * 超时时间（毫秒）
+   * Timeout (milliseconds)
    */
   timeout?: number
 
   /**
-   * 发送前回调函数
+   * Before send callback function
    */
   beforeSend?: <T extends EventProperties>(event: Payload<T>) => Payload<T> | null
 }
 
 /**
- * 插件生命周期阶段
+ * Plugin lifecycle stage
  */
 export type PluginLifecycle = 'idle' | 'loading' | 'active' | 'error' | 'destroyed'
 
 /**
- * 插件上下文接口
+ * Plugin context interface
  */
 export interface IPluginContext {
   /**
-   * 获取插件管理器实例
+   * Get plugin manager instance
    */
   getPlugins(): Record<string, IPlugin>
   
   /**
-   * 获取指定插件实例
-   * @param {string} name - 插件名称
-   * @returns {IPlugin | null} 插件实例
+   * Get specified plugin instance
+   * @param name - Plugin name
+   * @returns Plugin instance
    */
   getPlugin(name: string): IPlugin | null
   
   /**
-   * 获取所有已注册的插件
-   * @returns {IPlugin[]} 插件列表
+   * Get all registered plugins
+   * @returns Plugin list
    */
   getAllPlugins(): IPlugin[]
   
   /**
-   * 调用插件方法
-   * @param {string} pluginName - 插件名称
-   * @param {string} methodName - 方法名称
-   * @param {unknown[]} args - 方法参数
-   * @returns {unknown} 方法返回值
+   * Call plugin method
+   * @param pluginName - Plugin name
+   * @param methodName - Method name
+   * @param args - Method arguments
+   * @returns Method return value
    */
   callPluginMethod(pluginName: string, methodName: string, ...args: unknown[]): unknown
 }
 
 /**
- * 插件接口
+ * Plugin interface
  */
 export interface IPlugin {
   /**
-   * 插件名称
+   * Plugin name
    */
   name: string
   /**
-   * 插件版本
+   * Plugin version
    */
   version?: string
   /**
-   * 插件描述
+   * Plugin description
    */
   description?: string
   
   /**
-   * 插件设置方法
+   * Plugin setup method
    */
   setup?(context: IPluginContext): void
   /**
-   * 插件初始化方法
+   * Plugin initialization method
    */
   init?(context: IPluginContext): void
   /**
-   * 插件激活方法
+   * Plugin activation method
    */
   activate?(context: IPluginContext): void
   /**
-   * 插件停用方法
+   * Plugin deactivation method
    */
   deactivate?(context: IPluginContext): void
   /**
-   * 插件销毁方法
+   * Plugin destruction method
    */
   destroy?(context: IPluginContext): void
   
   /**
-   * 插件依赖
+   * Plugin dependencies
    */
   dependencies?: string[]
   /**
-   * 插件冲突
+   * Plugin conflicts
    */
   conflicts?: string[]
   
   /**
-   * 插件优先级（数字越小，优先级越高）
+   * Plugin priority (lower number means higher priority)
    */
   priority?: number
   
   /**
-   * 插件是否启用
+   * Whether the plugin is enabled
    */
   enabled?: boolean
   /**
-   * 插件生命周期状态
+   * Plugin lifecycle status
    */
   lifecycle?: PluginLifecycle
   
   /**
-   * 事件跟踪前回调
+   * Before event tracking callback
    */
   onTrack?: <T extends EventProperties>(event: Payload<T>) => Payload<T> | null
   /**
-   * 事件跟踪后回调
+   * After event tracking callback
    */
   onTracked?: <T extends EventProperties>(event: Payload<T>) => void
   /**
-   * 发送前回调
+   * Before send callback
    */
   beforeSend?: <T extends EventProperties>(events: Payload<T>[]) => Payload<T>[]
   /**
-   * 发送后回调
+   * After send callback
    */
   afterSend?: <T extends EventProperties>(events: Payload<T>[], success: boolean) => void
   /**
-   * 初始化前回调
+   * Before initialization callback
    */
   beforeInit?(context: IPluginContext): void
   /**
-   * 初始化后回调
+   * After initialization callback
    */
   afterInit?(context: IPluginContext): void
   /**
-   * 销毁前回调
+   * Before destruction callback
    */
   beforeDestroy?(context: IPluginContext): void
   /**
-   * 销毁后回调
+   * After destruction callback
    */
   afterDestroy?(context: IPluginContext): void
   
   /**
-   * 插件配置
+   * Plugin configuration
    */
   config?: Record<string, unknown>
   
   /**
-   * 插件状态
+   * Plugin state
    */
   state?: Record<string, unknown>
   
   /**
-   * 获取插件信息
+   * Get plugin information
    */
   getInfo?: () => Record<string, unknown>
 }

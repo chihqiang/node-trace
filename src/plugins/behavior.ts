@@ -1,6 +1,6 @@
 /**
- * 行为管理插件
- * 负责跟踪用户行为、页面浏览和行为分析
+ * Behavior management plugin
+ * Responsible for tracking user behavior, page views, and behavior analysis
  */
 
 import { isBrowser } from "../utils";
@@ -14,97 +14,97 @@ import type {
 } from "../types";
 
 /**
- * 行为路径存储键
+ * Behavior path storage key
  */
 const BEHAVIOR_PATH_KEY = "__analytics_behavior_path__";
 
 /**
- * 行为常量定义
+ * Behavior constants definition
  */
 export const BEHAVIOR_CONSTANTS = {
   /**
-   * 最大行为路径长度
+   * Maximum behavior path length
    */
   MAX_STEPS: 50,
   /**
-   * 保存间隔（毫秒）
+   * Save interval (milliseconds)
    */
   SAVE_INTERVAL: 2000,
   /**
-   * 默认最近行为数量
+   * Default recent behaviors limit
    */
   DEFAULT_RECENT_BEHAVIORS_LIMIT: 10,
   /**
-   * 行为上下文最近行为数量
+   * Behavior context recent behaviors limit
    */
   CONTEXT_RECENT_BEHAVIORS_LIMIT: 5,
   /**
-   * 分析结果限制数量
+   * Analysis result limit
    */
   ANALYSIS_RESULT_LIMIT: 5,
   /**
-   * 会话超时时间（毫秒）
+   * Session timeout (milliseconds)
    */
   SESSION_TIMEOUT: 30 * 60 * 1000,
 };
 
 /**
- * 行为步骤接口
+ * Behavior step interface
  */
 interface BehaviorStep {
   /**
-   * 事件名称
+   * Event name
    */
   event: string;
   /**
-   * 时间戳
+   * Timestamp
    */
   timestamp: number;
   /**
-   * 事件属性
+   * Event properties
    */
   properties: EventProperties;
   /**
-   * 路径
+   * Path
    */
   path: string;
   /**
-   * 来源
+   * Referrer
    */
   referrer: string;
 }
 
 /**
- * 行为管理器
- * 负责跟踪和管理用户行为
+ * Behavior manager
+ * Responsible for tracking and managing user behavior
  */
 class Behaviors {
   /**
-   * 行为路径
+   * Behavior path
    * @private
    */
   private behaviorPath: BehaviorStep[] = [];
 
   /**
-   * 保存定时器ID
+   * Save timeout ID
    * @private
    */
   private saveTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   /**
-   * 最后保存时间
+   * Last save time
    * @private
    */
   private lastSaveTime: number = 0;
 
   /**
-   * 保存间隔（毫秒）
+   * Save interval (milliseconds)
    * @private
    */
   private saveInterval: number = BEHAVIOR_CONSTANTS.SAVE_INTERVAL;
 
   /**
-   * 初始化行为管理器
+   * Initialize behavior manager
    */
   init(): void {
     if (!isBrowser()) return;
@@ -118,9 +118,9 @@ class Behaviors {
   }
 
   /**
-   * 加载行为路径
+   * Load behavior path
    * @private
-   * @returns {BehaviorStep[]} 行为路径
+   * @returns Behavior path
    */
   private loadBehaviorPath(): BehaviorStep[] {
     const pathStr = storageUtils.get(BEHAVIOR_PATH_KEY) as string | null;
@@ -134,39 +134,39 @@ class Behaviors {
   }
 
   /**
-   * 保存行为路径
+   * Save behavior path
    * @private
    */
   private saveBehaviorPath(): void {
     if (!isBrowser()) return;
 
-    // 清除之前的定时器
+    // Clear previous timeout
     if (this.saveTimeoutId) {
       clearTimeout(this.saveTimeoutId);
       this.saveTimeoutId = null;
     }
 
-    // 使用节流机制，避免频繁写入
+    // Use throttling mechanism to avoid frequent writes
     const now = Date.now();
     if (now - this.lastSaveTime < this.saveInterval) {
-      // 设置定时器，延迟保存
+      // Set timeout for delayed save
       this.saveTimeoutId = setTimeout(() => {
         this.saveBehaviorPathToStorage();
       }, this.saveInterval);
       return;
     }
 
-    // 立即保存
+    // Save immediately
     this.saveBehaviorPathToStorage();
   }
 
   /**
-   * 实际保存行为路径到存储
+   * Actually save behavior path to storage
    * @private
    */
   private saveBehaviorPathToStorage(): void {
     try {
-      // 限制行为路径长度
+      // Limit behavior path length
       if (this.behaviorPath.length > BEHAVIOR_CONSTANTS.MAX_STEPS) {
         this.behaviorPath = this.behaviorPath.slice(
           -BEHAVIOR_CONSTANTS.MAX_STEPS,
@@ -180,9 +180,9 @@ class Behaviors {
   }
 
   /**
-   * 记录行为
-   * @param {string} event - 事件名称
-   * @param {EventProperties} [properties={}] - 事件属性
+   * Track behavior
+   * @param event - Event name
+   * @param properties - Event properties
    */
   track(event: string, properties: EventProperties = {}): void {
     if (!isBrowser()) return;
@@ -204,8 +204,8 @@ class Behaviors {
   }
 
   /**
-   * 记录页面浏览
-   * @param {EventProperties} [properties={}] - 页面属性
+   * Track page view
+   * @param properties - Page properties
    */
   trackView(properties: EventProperties = {}): void {
     if (!isBrowser()) return;
@@ -227,17 +227,17 @@ class Behaviors {
   }
 
   /**
-   * 获取行为路径
-   * @returns {BehaviorStep[]} 行为路径
+   * Get behavior path
+   * @returns Behavior path
    */
   getPath(): BehaviorStep[] {
     return [...this.behaviorPath];
   }
 
   /**
-   * 获取最近的行为
-   * @param {number} [limit=10] - 限制数量
-   * @returns {BehaviorStep[]} 最近的行为
+   * Get recent behaviors
+   * @param limit - Limit count
+   * @returns Recent behaviors
    */
   getRecent(
     limit: number = BEHAVIOR_CONSTANTS.DEFAULT_RECENT_BEHAVIORS_LIMIT,
@@ -246,11 +246,11 @@ class Behaviors {
   }
 
   /**
-   * 获取行为路径统计
-   * @returns {Object} 行为统计信息
-   * @returns {number} totalSteps - 总步骤数
-   * @returns {number} uniqueEvents - 唯一事件数
-   * @returns {number} averageTimeBetweenSteps - 步骤间平均时间
+   * Get behavior path statistics
+   * @returns Behavior statistics
+   * @returns totalSteps - Total steps
+   * @returns uniqueEvents - Unique events count
+   * @returns averageTimeBetweenSteps - Average time between steps
    */
   getStats(): {
     totalSteps: number;
@@ -279,8 +279,8 @@ class Behaviors {
   }
 
   /**
-   * 获取行为路径上下文
-   * @returns {EventProperties} 行为上下文
+   * Get behavior path context
+   * @returns Behavior context
    */
   getContext(): EventProperties {
     const recentBehaviors = this.getRecent(
@@ -301,7 +301,7 @@ class Behaviors {
   }
 
   /**
-   * 清空行为路径
+   * Clear behavior path
    */
   clear(): void {
     if (!isBrowser()) return;
@@ -318,7 +318,7 @@ class Behaviors {
   }
 
   /**
-   * 清除定时器
+   * Clear timeouts
    */
   clearTimeouts(): void {
     if (this.saveTimeoutId) {
@@ -328,11 +328,11 @@ class Behaviors {
   }
 
   /**
-   * 分析行为路径
-   * @returns {Object} 行为分析结果
-   * @returns {Array} mostFrequentEvents - 最频繁的事件
-   * @returns {Array} commonPaths - 常见路径
-   * @returns {number} averageSessionDuration - 平均会话持续时间
+   * Analyze behavior path
+   * @returns Behavior analysis result
+   * @returns mostFrequentEvents - Most frequent events
+   * @returns commonPaths - Common paths
+   * @returns averageSessionDuration - Average session duration
    */
   analyze(): {
     mostFrequentEvents: Array<{ event: string; count: number }>;
@@ -374,9 +374,9 @@ class Behaviors {
   }
 
   /**
-   * 提取会话
+   * Extract sessions
    * @private
-   * @returns {Array} 会话列表
+   * @returns Session list
    */
   private extractSessions(): Array<{
     startTime: number;
@@ -400,9 +400,9 @@ class Behaviors {
       const timeDiff =
         step.timestamp - currentSession[currentSession.length - 1].timestamp;
 
-      // 会话超时检查
+      // Session timeout check
       if (timeDiff > BEHAVIOR_CONSTANTS.SESSION_TIMEOUT) {
-        // 结束当前会话
+        // End current session
         const endTime = currentSession[currentSession.length - 1].timestamp;
         sessions.push({
           startTime,
@@ -411,7 +411,7 @@ class Behaviors {
           steps: [...currentSession],
         });
 
-        // 开始新会话
+        // Start new session
         currentSession = [step];
         startTime = step.timestamp;
       } else {
@@ -419,7 +419,7 @@ class Behaviors {
       }
     }
 
-    // 添加最后一个会话
+    // Add last session
     if (currentSession.length > 0) {
       const endTime = currentSession[currentSession.length - 1].timestamp;
       sessions.push({
@@ -435,12 +435,12 @@ class Behaviors {
 }
 
 /**
- * 行为管理器实例
+ * Behavior manager instance
  */
 const behaviors = new Behaviors();
 
 /**
- * 行为插件
+ * Behavior plugin
  */
 export const behaviorPlugin: IPlugin = {
   name: "behavior",
@@ -465,7 +465,7 @@ export const behaviorPlugin: IPlugin = {
   },
 
   /**
-   * 事件跟踪前回调
+   * Before event tracking callback
    */
   onTrack<T extends EventProperties>(payload: Payload<T>): Payload<T> {
     behaviors.track(payload.event, payload.properties || {});
@@ -500,6 +500,6 @@ export const behaviorPlugin: IPlugin = {
 };
 
 /**
- * 导出行为管理器实例，以便在其他地方使用
+ * Export behavior manager instance for use elsewhere
  */
 export { behaviors };

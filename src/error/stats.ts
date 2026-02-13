@@ -1,5 +1,5 @@
 /**
- * 错误统计模块
+ * Error statistics module
  */
 import {
   ErrorType,
@@ -10,8 +10,8 @@ import {
 } from "./types";
 
 /**
- * 初始化错误统计
- * @returns {ErrorStats} 初始化后的错误统计对象
+ * Initialize error statistics
+ * @returns Initialized error statistics object
  */
 export function initializeStats(): ErrorStats {
   const errorTypes: ErrorType[] = [
@@ -71,9 +71,9 @@ export function initializeStats(): ErrorStats {
 }
 
 /**
- * 计算错误率
- * @param {number[]} timestamps - 错误时间戳列表
- * @returns {Object} 错误率对象
+ * Calculate error rate
+ * @param timestamps - List of error timestamps
+ * @returns Error rate object
  */
 export function calculateErrorRate(timestamps: number[]): {
   lastMinute: number;
@@ -90,10 +90,10 @@ export function calculateErrorRate(timestamps: number[]): {
 }
 
 /**
- * 生成错误摘要
- * @param {TraceError[]} errors - 错误列表
- * @param {ErrorStats} stats - 错误统计
- * @returns {ErrorSummary} 错误摘要
+ * Generate error summary
+ * @param errors - List of errors
+ * @param stats - Error statistics
+ * @returns Error summary
  */
 export function generateErrorSummary(
   errors: TraceError[],
@@ -112,7 +112,7 @@ export function generateErrorSummary(
     };
   }
 
-  // 找到最频繁的错误类型
+  // Find the most frequent error type
   let mostFrequentType: ErrorType | null = null;
   let maxTypeCount = 0;
   Object.entries(stats.byType).forEach(([type, count]) => {
@@ -122,7 +122,7 @@ export function generateErrorSummary(
     }
   });
 
-  // 找到最频繁的错误级别
+  // Find the most frequent error level
   let mostFrequentLevel: ErrorLevel | null = null;
   let maxLevelCount = 0;
   Object.entries(stats.byLevel).forEach(([level, count]) => {
@@ -142,10 +142,10 @@ export function generateErrorSummary(
 }
 
 /**
- * 清理过期的时间戳
- * @param {number[]} timestamps - 时间戳列表
- * @param {number} threshold - 阈值时间戳
- * @returns {number[]} 清理后的时间戳列表
+ * Clean up expired timestamps
+ * @param timestamps - List of timestamps
+ * @param threshold - Threshold timestamp
+ * @returns Cleaned list of timestamps
  */
 export function cleanupTimestamps(
   timestamps: number[],

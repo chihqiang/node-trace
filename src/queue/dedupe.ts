@@ -1,7 +1,7 @@
 import type { Payload, EventProperties } from "../types";
 
 /**
- * LRU缓存实现（专门用于字符串键）
+ * LRU cache implementation (specifically for string keys)
  */
 export class LRUCache<V> {
   private cache: Map<string, V>;
@@ -49,9 +49,9 @@ export class LRUCache<V> {
 }
 
 /**
- * 生成事件唯一键
- * @param event - 事件对象
- * @returns 事件唯一键
+ * Generate event unique key
+ * @param event - Event object
+ * @returns Event unique key
  */
 export function generateEventKey<T extends EventProperties>(
   event: Payload<T>,
@@ -60,7 +60,7 @@ export function generateEventKey<T extends EventProperties>(
 }
 
 /**
- * 事件去重管理器
+ * Event deduplication manager
  */
 export class EventDedupe {
   private cache: LRUCache<boolean>;
@@ -70,7 +70,7 @@ export class EventDedupe {
   }
 
   /**
-   * 检查事件是否已存在
+   * Check if event already exists
    */
   exists<T extends EventProperties>(event: Payload<T>): boolean {
     const key = generateEventKey(event);
@@ -78,7 +78,7 @@ export class EventDedupe {
   }
 
   /**
-   * 添加事件到去重缓存
+   * Add event to deduplication cache
    */
   add<T extends EventProperties>(event: Payload<T>): void {
     const key = generateEventKey(event);
@@ -86,7 +86,7 @@ export class EventDedupe {
   }
 
   /**
-   * 从去重缓存中移除事件
+   * Remove event from deduplication cache
    */
   remove<T extends EventProperties>(event: Payload<T>): void {
     const key = generateEventKey(event);
@@ -94,21 +94,21 @@ export class EventDedupe {
   }
 
   /**
-   * 批量移除事件
+   * Batch remove events
    */
   removeBatch<T extends EventProperties>(events: Payload<T>[]): void {
     events.forEach((event) => this.remove(event));
   }
 
   /**
-   * 清空去重缓存
+   * Clear deduplication cache
    */
   clear(): void {
     this.cache.clear();
   }
 
   /**
-   * 获取缓存大小
+   * Get cache size
    */
   size(): number {
     return this.cache.size();

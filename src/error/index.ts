@@ -1,32 +1,32 @@
 /**
- * 错误处理模块
- * 主入口文件，导出所有错误处理相关的类型和函数
+ * Error handling module
+ * Main entry file, exports all error handling related types and functions
  */
 
-// 导出类型
+// Export types
 export * from "./types";
 
-// 导出错误处理器
+// Export error handler
 export { ErrorHandler } from "./handler";
 
-// 导出统计工具
+// Export statistics utilities
 export * from "./stats";
 
-// 创建错误处理器实例
+// Create error handler instance
 import { ErrorHandler } from "./handler";
 
 /**
- * 错误处理器实例
+ * Error handler instance
  */
 export const errorHandler = new ErrorHandler();
 
 /**
- * 记录错误
- * @param {import('./types').ErrorType} type - 错误类型
- * @param {string} message - 错误消息
- * @param {unknown} [error] - 原始错误对象
- * @param {Record<string, unknown>} [context] - 错误上下文
- * @param {import('./types').ErrorLevel} [level=error] - 错误级别
+ * Capture error
+ * @param type - Error type
+ * @param message - Error message
+ * @param error - Original error object
+ * @param context - Error context
+ * @param level - Error level
  */
 export function captureError(
   type: import("./types").ErrorType,
@@ -39,9 +39,9 @@ export function captureError(
 }
 
 /**
- * 处理网络错误
- * @param {unknown} error - 错误对象
- * @param {Record<string, unknown>} [context] - 错误上下文
+ * Handle network error
+ * @param error - Error object
+ * @param context - Error context
  */
 export function handleNetworkError(
   error: unknown,
@@ -51,9 +51,9 @@ export function handleNetworkError(
 }
 
 /**
- * 处理存储错误
- * @param {unknown} error - 错误对象
- * @param {Record<string, unknown>} [context] - 错误上下文
+ * Handle storage error
+ * @param error - Error object
+ * @param context - Error context
  */
 export function handleStorageError(
   error: unknown,
@@ -63,9 +63,9 @@ export function handleStorageError(
 }
 
 /**
- * 处理浏览器 API 错误
- * @param {unknown} error - 错误对象
- * @param {Record<string, unknown>} [context] - 错误上下文
+ * Handle browser API error
+ * @param error - Error object
+ * @param context - Error context
  */
 export function handleBrowserError(
   error: unknown,
@@ -75,9 +75,9 @@ export function handleBrowserError(
 }
 
 /**
- * 处理插件错误
- * @param {unknown} error - 错误对象
- * @param {Record<string, unknown>} [context] - 错误上下文
+ * Handle plugin error
+ * @param error - Error object
+ * @param context - Error context
  */
 export function handlePluginError(
   error: unknown,
@@ -87,9 +87,9 @@ export function handlePluginError(
 }
 
 /**
- * 处理队列错误
- * @param {unknown} error - 错误对象
- * @param {Record<string, unknown>} [context] - 错误上下文
+ * Handle queue error
+ * @param error - Error object
+ * @param context - Error context
  */
 export function handleQueueError(
   error: unknown,
@@ -99,9 +99,9 @@ export function handleQueueError(
 }
 
 /**
- * 处理设备 ID 错误
- * @param {unknown} error - 错误对象
- * @param {Record<string, unknown>} [context] - 错误上下文
+ * Handle device ID error
+ * @param error - Error object
+ * @param context - Error context
  */
 export function handleDeviceError(
   error: unknown,
@@ -111,9 +111,9 @@ export function handleDeviceError(
 }
 
 /**
- * 处理会话错误
- * @param {unknown} error - 错误对象
- * @param {Record<string, unknown>} [context] - 错误上下文
+ * Handle session error
+ * @param error - Error object
+ * @param context - Error context
  */
 export function handleSessionError(
   error: unknown,
@@ -123,9 +123,9 @@ export function handleSessionError(
 }
 
 /**
- * 处理行为错误
- * @param {unknown} error - 错误对象
- * @param {Record<string, unknown>} [context] - 错误上下文
+ * Handle behavior error
+ * @param error - Error object
+ * @param context - Error context
  */
 export function handleBehaviorError(
   error: unknown,
@@ -135,9 +135,9 @@ export function handleBehaviorError(
 }
 
 /**
- * 处理数据错误
- * @param {unknown} error - 错误对象
- * @param {Record<string, unknown>} [context] - 错误上下文
+ * Handle data error
+ * @param error - Error object
+ * @param context - Error context
  */
 export function handleDataError(
   error: unknown,
@@ -147,9 +147,9 @@ export function handleDataError(
 }
 
 /**
- * 处理未知错误
- * @param {unknown} error - 错误对象
- * @param {Record<string, unknown>} [context] - 错误上下文
+ * Handle unknown error
+ * @param error - Error object
+ * @param context - Error context
  */
 export function handleUnknownError(
   error: unknown,

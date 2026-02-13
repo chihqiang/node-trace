@@ -1,44 +1,44 @@
 /**
- * 插件导出模块
- * 导出所有可用的插件
+ * Plugin export module
+ * Export all available plugins
  */
 
 /**
- * 错误插件
+ * Error plugin
  */
 export { errorPlugin } from "./error";
 
 /**
- * 性能插件
+ * Performance plugin
  */
 export { performancePlugin } from "./performance";
 
 /**
- * 页面浏览插件
+ * Page view plugin
  */
 export { pageviewPlugin } from "./pageview";
 
 /**
- * 行为插件
+ * Behavior plugin
  */
 export { behaviorPlugin } from "./behavior";
 
 /**
- * 网络插件
+ * Network plugin
  */
 export { networkPlugin } from "./network";
 
 /**
- * 会话插件
+ * Session plugin
  */
 export { sessionPlugin } from "./session";
 
 /**
- * 浏览器插件
+ * Browser plugin
  */
 export { browserPlugin } from "./browser";
 
 /**
- * 用户插件
+ * User plugin
  */
 export { userPlugin } from "./user";

@@ -1,24 +1,24 @@
 /**
- * 导入Dexie数据库库
+ * Import Dexie database library
  */
 import Dexie, { Table } from "dexie";
 /**
- * 导入事件负载类型
+ * Import event payload type
  */
 import { Payload } from "./types";
 
 /**
- * NodeTrace数据库类
- * 扩展自Dexie，用于存储离线事件
+ * NodeTrace database class
+ * Extends Dexie for storing offline events
  */
 class NodeTraceDB extends Dexie {
   /**
-   * 离线事件表
+   * Offline events table
    */
   offlineEvents!: Table<Payload>;
 
   /**
-   * 构造函数
+   * Constructor
    */
   constructor() {
     super("nodeTraceDb");
@@ -30,18 +30,18 @@ class NodeTraceDB extends Dexie {
 
 
 /**
- * 数据库实例
+ * Database instance
  */
 const db = new NodeTraceDB();
 
 /**
- * Dexie存储类
- * 用于管理离线事件的存储操作
+ * Dexie storage class
+ * Used for managing offline event storage operations
  */
 export class DexieStorage {
   /**
-   * 获取所有离线事件
-   * @returns {Promise<Payload[]>} 离线事件数组
+   * Get all offline events
+   * @returns Offline events array
    */
   async all(): Promise<Payload[]> {
     try {
@@ -52,34 +52,31 @@ export class DexieStorage {
   }
 
   /**
-   * 添加离线事件
-   * @param {Payload[]} events - 要添加的事件数组
-   * @returns {Promise<void>}
+   * Add offline events
+   * @param events - Events array to add
    */
   async add(events: Payload[]): Promise<void> {
     try {
       await db.offlineEvents.bulkAdd(events);
     } catch {
-      // 忽略存储错误
+      // Ignore storage errors
     }
   }
 
   /**
- * 清除所有离线事件
- * @returns {Promise<void>}
+ * Clear all offline events
  */
 async clear(): Promise<void> {
   try {
     await db.offlineEvents.clear();
   } catch {
-    // 忽略存储错误
+    // Ignore storage errors
   }
 }
 
 /**
- * 根据ID删除离线事件
- * @param {string[]} ids - 要删除的事件ID数组
- * @returns {Promise<void>}
+ * Delete offline events by ID
+ * @param ids - Event IDs array to delete
  */
 async delete(ids: string[]): Promise<void> {
   try {
@@ -87,13 +84,13 @@ async delete(ids: string[]): Promise<void> {
       await db.offlineEvents.bulkDelete(ids);
     }
   } catch {
-    // 忽略存储错误
+    // Ignore storage errors
   }
 }
 }
 
 
 /**
- * Dexie存储实例
+ * Dexie storage instance
  */
 export const DB = new DexieStorage();

@@ -1,6 +1,6 @@
 /**
- * 性能插件
- * 负责收集和发送页面性能数据，包括加载时间、首字节时间、DOM解析时间等
+ * Performance plugin
+ * Responsible for collecting and sending page performance data, including load time, time to first byte, DOM parsing time, etc.
  */
 
 import { track } from "../core";
@@ -8,7 +8,7 @@ import type { IPlugin, IPluginContext } from "../types";
 import { isBrowser } from "../utils";
 
 /**
- * 性能绘制条目接口
+ * Performance paint entry interface
  */
 interface PerformancePaintEntry {
   name: string;
@@ -18,7 +18,7 @@ interface PerformancePaintEntry {
 }
 
 /**
- * 发送性能数据
+ * Send performance data
  */
 function sendPerformanceData() {
   if (!isBrowser()) return;
@@ -27,30 +27,30 @@ function sendPerformanceData() {
     const performance = window.performance;
     if (!performance || !performance.getEntriesByType) return;
 
-    // 获取导航性能数据
+    // Get navigation performance data
     const navigationEntries = performance.getEntriesByType("navigation");
     if (navigationEntries.length > 0) {
       const navEntry = navigationEntries[0] as PerformanceNavigationTiming;
 
       track("page_performance", {
-        // 页面加载时间
+        // Page load time
         loadTime: navEntry.loadEventEnd - navEntry.fetchStart,
-        // 首字节时间
+        // Time to first byte
         ttfb: navEntry.responseStart - navEntry.fetchStart,
-        // 解析 DOM 时间
+        // DOM parsing time
         domContentLoaded:
           navEntry.domContentLoadedEventEnd - navEntry.fetchStart,
-        // 重定向时间
+        // Redirect time
         redirectTime: navEntry.redirectEnd - navEntry.redirectStart,
-        // DNS 查询时间
+        // DNS query time
         dnsTime: navEntry.domainLookupEnd - navEntry.domainLookupStart,
-        // TCP 连接时间
+        // TCP connection time
         tcpTime: navEntry.connectEnd - navEntry.connectStart,
-        // SSL 握手时间
+        // SSL handshake time
         sslTime: navEntry.secureConnectionStart
           ? navEntry.connectEnd - navEntry.secureConnectionStart
           : 0,
-        // 首屏时间（估算）
+        // First paint time (estimated)
         firstPaint:
           performance
             .getEntriesByType("paint")
@@ -66,7 +66,7 @@ function sendPerformanceData() {
       });
     }
 
-    // 获取资源加载性能数据
+    // Get resource loading performance data
     const resourceEntries = performance.getEntriesByType("resource");
     if (resourceEntries.length > 0) {
       const resourceStats = {
@@ -99,26 +99,26 @@ function sendPerformanceData() {
       track("resource_performance", resourceStats);
     }
   } catch {
-    // 忽略错误，避免无限循环
+    // Ignore errors to avoid infinite loops
   }
 }
 
 /**
- * 性能插件
+ * Performance plugin
  */
 export const performancePlugin: IPlugin = {
   /**
-   * 插件名称
+   * Plugin name
    */
   name: "performance",
 
   /**
-   * 插件设置方法
+   * Plugin setup method
    */
   setup(_context: IPluginContext) {
     if (!isBrowser()) return;
 
-    // 等待页面加载完成
+    // Wait for page load to complete
     if (document.readyState === "complete") {
       sendPerformanceData();
     } else {

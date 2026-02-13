@@ -2,17 +2,17 @@ import { isBrowser, now } from "../utils";
 import { QUEUE_CONSTANTS } from "./constants";
 
 /**
- * 网络类型
+ * Network type
  */
 export type NetworkType = "unknown" | "online" | "offline" | "slow";
 
 /**
- * 有效网络类型
+ * Effective network type
  */
 export type EffectiveNetworkType = "2g" | "3g" | "4g" | "5g" | "unknown";
 
 /**
- * 网络状态接口
+ * Network state interface
  */
 export interface NetworkState {
   type: NetworkType;
@@ -23,7 +23,7 @@ export interface NetworkState {
 }
 
 /**
- * 网络状态管理器
+ * Network state manager
  */
 export class NetworkManager {
   private state: NetworkState;
@@ -41,7 +41,7 @@ export class NetworkManager {
   }
 
   /**
-   * 检查是否需要更新网络状态
+   * Check if network state needs update
    */
   private shouldUpdate(): boolean {
     const nowTime = now();
@@ -49,7 +49,7 @@ export class NetworkManager {
   }
 
   /**
-   * 更新网络状态
+   * Update network state
    */
   update(): void {
     if (!isBrowser() || typeof navigator === "undefined") {
@@ -80,7 +80,7 @@ export class NetworkManager {
   }
 
   /**
-   * 获取网络状态
+   * Get network state
    */
   getState(): NetworkState {
     this.update();
@@ -88,7 +88,7 @@ export class NetworkManager {
   }
 
   /**
-   * 获取网络类型
+   * Get network type
    */
   getType(): NetworkType {
     this.update();
@@ -96,7 +96,7 @@ export class NetworkManager {
   }
 
   /**
-   * 检查是否在线
+   * Check if online
    */
   isOnline(): boolean {
     this.update();
@@ -104,7 +104,7 @@ export class NetworkManager {
   }
 
   /**
-   * 检查是否离线
+   * Check if offline
    */
   isOffline(): boolean {
     this.update();
@@ -112,7 +112,7 @@ export class NetworkManager {
   }
 
   /**
-   * 检查是否为慢速网络
+   * Check if slow network
    */
   isSlow(): boolean {
     this.update();
@@ -121,6 +121,6 @@ export class NetworkManager {
 }
 
 /**
- * 网络管理器实例
+ * Network manager instance
  */
 export const networkManager = new NetworkManager();

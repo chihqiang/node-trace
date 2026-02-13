@@ -1,6 +1,6 @@
 /**
- * 会话管理插件
- * 负责会话的创建、维护、超时处理和会话数据的收集
+ * Session management plugin
+ * Responsible for session creation, maintenance, timeout handling, and session data collection
  */
 
 import { isBrowser } from "../utils";
@@ -14,91 +14,91 @@ import type {
 } from "../types";
 
 /**
- * 会话ID存储键
+ * Session ID storage key
  */
 const SESSION_ID_KEY = "__analytics_session_id__";
 
 /**
- * 会话开始时间存储键
+ * Session start time storage key
  */
 const SESSION_START_KEY = "__analytics_session_start__";
 
 /**
- * 会话最后活动时间存储键
+ * Session last active time storage key
  */
 const SESSION_LAST_ACTIVE_KEY = "__analytics_session_last_active__";
 
 /**
- * 会话常量定义
+ * Session constants definition
  */
 export const SESSION_CONSTANTS = {
   /**
-   * 会话超时时间（30分钟）
+   * Session timeout (30 minutes)
    */
   TIMEOUT: 30 * 60 * 1000,
   /**
-   * 存储同步间隔（毫秒）
+   * Storage sync interval (milliseconds)
    */
   SYNC_INTERVAL: 5000,
 };
 
 /**
- * 会话状态接口
+ * Session state interface
  */
 interface SessionState {
   /**
-   * 会话ID
+   * Session ID
    */
   id: string;
   /**
-   * 会话开始时间
+   * Session start time
    */
   startTime: number;
   /**
-   * 会话最后活动时间
+   * Session last active time
    */
   lastActive: number;
   /**
-   * 页面浏览次数
+   * Page views count
    */
   pageViews: number;
   /**
-   * 事件次数
+   * Events count
    */
   events: number;
   /**
-   * 是否为新会话
+   * Whether it's a new session
    */
   isNew: boolean;
 }
 
 /**
- * 会话管理器类
+ * Session manager class
  */
 class Sessions {
   /**
-   * 会话状态
+   * Session state
    */
   private session: SessionState | null = null;
   /**
-   * 超时定时器ID
+   * Timeout ID
    */
   private timeoutId: ReturnType<typeof setTimeout> | null = null;
   /**
-   * 内存缓存
+   * Memory cache
    */
   private storageCache: Record<string, string | null> = {};
   /**
-   * 上次存储同步时间
+   * Last storage sync time
    */
   private lastStorageSync: number = 0;
   /**
-   * 存储同步间隔（毫秒）
+   * Storage sync interval (milliseconds)
    */
   private syncInterval: number = SESSION_CONSTANTS.SYNC_INTERVAL;
 
   /**
-   * 初始化会话
+   * Initialize session
    */
   start(): void {
     if (!isBrowser()) return;
@@ -112,7 +112,7 @@ class Sessions {
     }
   }
   /**
-   * 更新会话最后活动时间
+   * Update session last active time
    */
   updateLastActive(): void {
     if (!isBrowser() || !this.session) return;
@@ -121,10 +121,10 @@ class Sessions {
       const now = Date.now();
       this.session.lastActive = now;
 
-      // 更新内存缓存
+      // Update memory cache
       this.storageCache[SESSION_LAST_ACTIVE_KEY] = now.toString();
 
-      // 异步同步到存储
+      // Async sync to storage
       this.syncStorage();
 
       this.resetSessionTimeout();
@@ -134,8 +134,8 @@ class Sessions {
   }
 
   /**
-   * 获取会话ID
-   * @returns {string | null} 会话ID
+   * Get session ID
+   * @returns Session ID
    */
   getID(): string | null {
     if (!this.session) {
@@ -145,8 +145,8 @@ class Sessions {
   }
 
   /**
-   * 获取会话开始时间
-   * @returns {number | null} 会话开始时间
+   * Get session start time
+   * @returns Session start time
    */
   getStartTime(): number | null {
     if (!this.session) {
@@ -156,8 +156,8 @@ class Sessions {
   }
 
   /**
-   * 获取会话持续时间
-   * @returns {number} 会话持续时间
+   * Get session duration
+   * @returns Session duration
    */
   getDuration(): number {
     if (!this.session) {
@@ -167,8 +167,8 @@ class Sessions {
   }
 
   /**
-   * 检查是否为新会话
-   * @returns {boolean} 是否为新会话
+   * Check if it's a new session
+   * @returns Whether it's a new session
    */
   isNew(): boolean {
     if (!this.session) {
@@ -178,7 +178,7 @@ class Sessions {
   }
 
   /**
-   * 清理定时器
+   * Clear timeout
    */
   clearTimeout(): void {
     if (this.timeoutId) {
@@ -188,7 +188,7 @@ class Sessions {
   }
 
   /**
-   * 增加页面浏览次数
+   * Increment page views count
    */
   incrementPageViews(): void {
     if (this.session) {
@@ -197,7 +197,7 @@ class Sessions {
   }
 
   /**
-   * 增加事件次数
+   * Increment events count
    */
   incrementEvents(): void {
     if (this.session) {
@@ -206,8 +206,8 @@ class Sessions {
   }
 
   /**
-   * 获取会话统计信息
-   * @returns {Object} 会话统计信息
+   * Get session statistics
+   * @returns Session statistics
    */
   getStats(): {
     pageViews: number;
@@ -225,8 +225,8 @@ class Sessions {
   }
 
   /**
-   * 获取会话上下文
-   * @returns {EventProperties} 会话上下文
+   * Get session context
+   * @returns Session context
    */
   getContext(): EventProperties {
     if (!this.session) {
@@ -242,18 +242,18 @@ class Sessions {
     };
   }
   /**
-   * 结束会话
+   * Stop session
    */
   stop(): void {
     if (!isBrowser()) return;
 
     try {
-      // 清理存储
+      // Clear storage
       storageUtils.remove(SESSION_ID_KEY);
       storageUtils.remove(SESSION_START_KEY);
       storageUtils.remove(SESSION_LAST_ACTIVE_KEY);
 
-      // 清理内存缓存
+      // Clear memory cache
       delete this.storageCache[SESSION_ID_KEY];
       delete this.storageCache[SESSION_START_KEY];
       delete this.storageCache[SESSION_LAST_ACTIVE_KEY];
@@ -270,14 +270,14 @@ class Sessions {
   }
 
   /**
-   * 开始会话超时定时器
+   * Start session timeout
    */
   private startSessionTimeout(): void {
     this.resetSessionTimeout();
   }
 
   /**
-   * 重置会话超时定时器
+   * Reset session timeout
    */
   private resetSessionTimeout(): void {
     if (this.timeoutId) {
@@ -290,7 +290,7 @@ class Sessions {
   }
 
   /**
-   * 同步存储缓存
+   * Sync storage cache
    */
   private syncStorage(): void {
     const now = Date.now();
@@ -298,7 +298,7 @@ class Sessions {
       return;
     }
 
-    // 将内存缓存中的数据写入存储
+    // Write memory cache data to storage
     Object.entries(this.storageCache).forEach(([key, value]) => {
       storageUtils.set(key, value);
     });
@@ -307,16 +307,16 @@ class Sessions {
   }
 
   /**
-   * 获取或创建会话
-   * @returns {SessionState} 会话状态
+   * Get or create session
+   * @returns Session state
    */
   private getOrCreateSession(): SessionState {
-    // 首先检查内存缓存
+    // First check memory cache
     let sessionId = this.storageCache[SESSION_ID_KEY];
     let startTimeStr = this.storageCache[SESSION_START_KEY];
     let lastActiveStr = this.storageCache[SESSION_LAST_ACTIVE_KEY];
 
-    // 如果内存缓存中没有，从存储中读取
+    // If not in memory cache, read from storage
     if (!sessionId || !startTimeStr || !lastActiveStr) {
       sessionId = storageUtils.get(SESSION_ID_KEY) as string | null;
       startTimeStr = storageUtils.get(SESSION_START_KEY) as string | null;
@@ -324,7 +324,7 @@ class Sessions {
         | string
         | null;
 
-      // 更新内存缓存
+      // Update memory cache
       if (sessionId) this.storageCache[SESSION_ID_KEY] = sessionId;
       if (startTimeStr) this.storageCache[SESSION_START_KEY] = startTimeStr;
       if (lastActiveStr)
@@ -334,11 +334,11 @@ class Sessions {
     const startTime = startTimeStr ? Number(startTimeStr) : null;
     const lastActive = lastActiveStr ? Number(lastActiveStr) : null;
 
-    // 检查会话是否存在且未超时
+    // Check if session exists and not timed out
     if (sessionId && startTime && lastActive) {
       const now = Date.now();
       if (now - lastActive < SESSION_CONSTANTS.TIMEOUT) {
-        // 会话有效，返回现有会话
+        // Session valid, return existing session
         return {
           id: sessionId,
           startTime,
@@ -350,16 +350,16 @@ class Sessions {
       }
     }
 
-    // 创建新会话
+    // Create new session
     const newSessionId = this.generateSessionId();
     const newStartTime = Date.now();
 
-    // 更新内存缓存
+    // Update memory cache
     this.storageCache[SESSION_ID_KEY] = newSessionId;
     this.storageCache[SESSION_START_KEY] = newStartTime.toString();
     this.storageCache[SESSION_LAST_ACTIVE_KEY] = newStartTime.toString();
 
-    // 立即同步到存储
+    // Sync to storage immediately
     this.syncStorage();
 
     return {
@@ -373,8 +373,8 @@ class Sessions {
   }
 
   /**
-   * 生成会话ID
-   * @returns {string} 会话ID
+   * Generate session ID
+   * @returns Session ID
    */
   private generateSessionId(): string {
     return (
@@ -384,12 +384,12 @@ class Sessions {
 }
 
 /**
- * 会话管理器实例
+ * Session manager instance
  */
 const sessions = new Sessions();
 
 /**
- * 会话插件
+ * Session plugin
  */
 export const sessionPlugin: IPlugin = {
   name: "session",
@@ -398,26 +398,26 @@ export const sessionPlugin: IPlugin = {
   priority: 10,
 
   /**
-   * 初始化插件
+   * Initialize plugin
    */
   init(_context: IPluginContext): void {
     sessions.start();
   },
 
   /**
-   * 事件跟踪前回调
+   * Before event tracking callback
    */
   onTrack<T extends EventProperties>(payload: Payload<T>): Payload<T> {
-    // 更新会话活动时间和事件计数
+    // Update session activity time and event count
     sessions.updateLastActive();
     sessions.incrementEvents();
 
-    // 如果是页面浏览事件，增加页面浏览次数
+    // If it's a page view event, increment page views count
     if (payload.event === "page_view") {
       sessions.incrementPageViews();
     }
 
-    // 添加会话上下文
+    // Add session context
     const sessionContext = sessions.getContext();
     return {
       ...payload,
@@ -429,14 +429,14 @@ export const sessionPlugin: IPlugin = {
   },
 
   /**
-   * 插件状态
+   * Plugin state
    */
   state: {
     sessions,
   },
 
   /**
-   * 获取插件信息
+   * Get plugin information
    */
   getInfo(): Record<string, any> {
     return {
@@ -454,6 +454,6 @@ export const sessionPlugin: IPlugin = {
 };
 
 /**
- * 导出会话管理器实例，以便在其他地方使用
+ * Export session manager instance for use elsewhere
  */
 export { sessions };
