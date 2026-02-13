@@ -86,7 +86,7 @@ function improvedHash(input: string): string {
   }
 
   const randomPart = Math.random().toString(36).slice(2, 10);
-  const combined = `${hashStr}_${randomPart}`;
+  const combined = `${hashStr}${randomPart}`;
   return combined.substring(0, DEFAULT_DEVICE_ID_LENGTH);
 }
 
