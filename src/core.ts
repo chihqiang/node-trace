@@ -449,16 +449,17 @@ function shouldSend(event: string) {
 export function track<T extends EventProperties>(event: string, properties?: T) {
   if (!shouldSend(event)) return
 
-  // Generate unique event ID
   const eventId = stringUtils.generateEventId()
   let payload: Payload<T> = { id: eventId, event, properties, timestamp: now() }
 
-  // Use sorted plugin list to ensure plugins execute by priority (cache result)
   let allPlugins = state.sortedPluginsCache
   if (!allPlugins) {
     allPlugins = plugins.sort()  
     state.sortedPluginsCache = allPlugins
   }
+
+  const pluginsToNotify: IPlugin[] = []
+
   for (const p of allPlugins) { 
     if (p.onTrack) {
       try {
@@ -469,6 +470,9 @@ export function track<T extends EventProperties>(event: string, properties?: T) 
         handlePluginError(error, { plugin: p.name, event: event })
       }
     }
+    if (p.onTracked) {
+      pluginsToNotify.push(p)
+    }
   }
 
   const final = state.options?.beforeSend?.(payload)
@@ -477,14 +481,11 @@ export function track<T extends EventProperties>(event: string, properties?: T) 
   const eventToPush = final || payload
   push(eventToPush)
 
-  // Call plugin's onTracked method
-  for (const p of allPlugins) {
-    if (p.onTracked) {
-      try {
-        p.onTracked(eventToPush)
-      } catch (error) {
-        handlePluginError(error, { plugin: p.name, event: event })
-      }
+  for (const p of pluginsToNotify) {
+    try {
+      p.onTracked?.(eventToPush)
+    } catch (error) {
+      handlePluginError(error, { plugin: p.name, event: event })
     }
   }
 }

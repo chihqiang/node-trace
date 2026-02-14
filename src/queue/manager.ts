@@ -47,6 +47,9 @@ export class QueueManager {
   private timer: ReturnType<typeof setTimeout> | null;
   private retryTimers: ReturnType<typeof setTimeout>[];
   private offlineCheckTimer: ReturnType<typeof setInterval> | null;
+  private cachedPressure: number | null;
+  private pressureCacheTime: number;
+  private readonly PRESSURE_CACHE_TTL: number;
 
   constructor() {
     this.queue = [];
@@ -62,6 +65,9 @@ export class QueueManager {
     this.timer = null;
     this.retryTimers = [];
     this.offlineCheckTimer = null;
+    this.cachedPressure = null;
+    this.pressureCacheTime = 0;
+    this.PRESSURE_CACHE_TTL = 1000;
   }
 
   /**
@@ -77,7 +83,16 @@ export class QueueManager {
    */
   private calculatePressure(): number {
     if (!this.config) return 0;
-    return this.queue.length / this.config.maxQueueSize;
+
+    const now = Date.now();
+    if (this.cachedPressure !== null && now - this.pressureCacheTime < this.PRESSURE_CACHE_TTL) {
+      return this.cachedPressure;
+    }
+
+    const pressure = this.queue.length / this.config.maxQueueSize;
+    this.cachedPressure = pressure;
+    this.pressureCacheTime = now;
+    return pressure;
   }
 
   /**
@@ -180,6 +195,8 @@ export class QueueManager {
       console.log("[Node-Trace] Event pushed:", event.event);
       console.log("[Node-Trace] Queue length:", this.queue.length);
     }
+
+    this.cachedPressure = null;
 
     const pressure = this.calculatePressure();
     if (pressure > QUEUE_CONSTANTS.QUEUE_PRESSURE_HIGH) {
