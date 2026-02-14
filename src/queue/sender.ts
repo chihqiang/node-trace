@@ -31,6 +31,9 @@ export interface SendOptions {
  * Send strategy selector
  */
 export class SendStrategySelector {
+  private strategyHistory: Map<SendStrategy, { success: number; total: number }> = new Map();
+  private readonly HISTORY_SIZE = 10;
+
   /**
    * Select send strategy
    * @param _body - Serialized data (reserved for future extension)
@@ -43,16 +46,72 @@ export class SendStrategySelector {
     if (networkType === "offline") {
       return "beacon";
     } else if (networkType === "slow") {
-      return "fetch";
+      return this.selectBasedOnHistory(bodySize, ["fetch", "beacon"]);
     }
 
     if (bodySize > QUEUE_CONSTANTS.BEACON_SIZE_LIMIT) {
-      return "fetch";
+      return this.selectBasedOnHistory(bodySize, ["fetch", "xhr"]);
     } else if (bodySize < QUEUE_CONSTANTS.SMALL_DATA_THRESHOLD) {
-      return "beacon";
+      return this.selectBasedOnHistory(bodySize, ["beacon", "fetch"]);
     }
 
-    return "fetch";
+    return this.selectBasedOnHistory(bodySize, ["fetch", "beacon", "xhr"]);
+  }
+
+  /**
+   * Select strategy based on historical success rate
+   */
+  private selectBasedOnHistory(_bodySize: number, candidates: SendStrategy[]): SendStrategy {
+    let bestStrategy = candidates[0];
+    let bestSuccessRate = 0;
+
+    for (const strategy of candidates) {
+      const history = this.strategyHistory.get(strategy);
+      if (history && history.total > 0) {
+        const successRate = history.success / history.total;
+        if (successRate > bestSuccessRate) {
+          bestSuccessRate = successRate;
+          bestStrategy = strategy;
+        }
+      }
+    }
+
+    return bestStrategy;
+  }
+
+  /**
+   * Record strategy result
+   */
+  recordResult(strategy: SendStrategy, success: boolean): void {
+    const history = this.strategyHistory.get(strategy) || { success: 0, total: 0 };
+    history.total++;
+    if (success) {
+      history.success++;
+    }
+    this.strategyHistory.set(strategy, history);
+
+    if (history.total > this.HISTORY_SIZE) {
+      history.success = Math.floor(history.success * 0.8);
+      history.total = Math.floor(history.total * 0.8);
+    }
+  }
+
+  /**
+   * Get success rate for a strategy
+   */
+  getSuccessRate(strategy: SendStrategy): number {
+    const history = this.strategyHistory.get(strategy);
+    if (!history || history.total === 0) {
+      return 1.0;
+    }
+    return history.success / history.total;
+  }
+
+  /**
+   * Reset history
+   */
+  resetHistory(): void {
+    this.strategyHistory.clear();
   }
 }
 
@@ -209,26 +268,32 @@ export class Sender {
     const strategy = this.strategySelector.select(body, bodySize);
 
     let success = false;
+    let actualStrategy = strategy;
 
     if (strategy === "beacon") {
       success = await sendWithBeacon(endpoint, body, debug);
       if (!success) {
         success = await sendWithFetch(endpoint, body, headers, timeout, debug);
+        actualStrategy = "fetch";
       }
     }
 
     if (strategy === "fetch" || !success) {
       success = await sendWithFetch(endpoint, body, headers, timeout, debug);
+      actualStrategy = "fetch";
       if (!success) {
         success = await sendWithXHR(endpoint, data, timeout, debug);
+        actualStrategy = "xhr";
       }
     }
 
     const time = Date.now() - startTime;
 
+    this.strategySelector.recordResult(actualStrategy, success);
+
     return {
       success,
-      strategy,
+      strategy: actualStrategy,
       time,
     };
   }

@@ -39,6 +39,11 @@ const db = new NodeTraceDB();
  * Used for managing offline event storage operations
  */
 export class DexieStorage {
+  private writeBuffer: Payload[] = [];
+  private writeTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly WRITE_BUFFER_SIZE = 100;
+  private readonly WRITE_BUFFER_TIMEOUT = 5000;
+
   /**
    * Get all offline events
    * @returns Offline events array
@@ -56,37 +61,75 @@ export class DexieStorage {
    * @param events - Events array to add
    */
   async add(events: Payload[]): Promise<void> {
+    this.writeBuffer.push(...events);
+
+    if (this.writeBuffer.length >= this.WRITE_BUFFER_SIZE) {
+      await this.flushBuffer();
+    } else {
+      this.scheduleFlush();
+    }
+  }
+
+  /**
+   * Clear all offline events
+   */
+  async clear(): Promise<void> {
     try {
-      await db.offlineEvents.bulkAdd(events);
+      await db.offlineEvents.clear();
     } catch {
       // Ignore storage errors
     }
   }
 
   /**
- * Clear all offline events
- */
-async clear(): Promise<void> {
-  try {
-    await db.offlineEvents.clear();
-  } catch {
-    // Ignore storage errors
-  }
-}
-
-/**
- * Delete offline events by ID
- * @param ids - Event IDs array to delete
- */
-async delete(ids: string[]): Promise<void> {
-  try {
-    if (ids.length > 0) {
-      await db.offlineEvents.bulkDelete(ids);
+   * Delete offline events by ID
+   * @param ids - Event IDs array to delete
+   */
+  async delete(ids: string[]): Promise<void> {
+    try {
+      if (ids.length > 0) {
+        await db.offlineEvents.bulkDelete(ids);
+      }
+    } catch {
+      // Ignore storage errors
     }
-  } catch {
-    // Ignore storage errors
   }
-}
+
+  /**
+   * Flush write buffer to database
+   */
+  private async flushBuffer(): Promise<void> {
+    if (this.writeBuffer.length === 0) return;
+
+    const eventsToWrite = this.writeBuffer.splice(0);
+    try {
+      await db.offlineEvents.bulkAdd(eventsToWrite);
+    } catch {
+      // Ignore storage errors
+    }
+  }
+
+  /**
+   * Schedule buffer flush
+   */
+  private scheduleFlush(): void {
+    if (this.writeTimer) return;
+    this.writeTimer = setTimeout(() => {
+      this.flushBuffer();
+      this.writeTimer = null;
+    }, this.WRITE_BUFFER_TIMEOUT);
+  }
+
+  /**
+   * Force flush buffer immediately
+   */
+  async forceFlush(): Promise<void> {
+    if (this.writeTimer) {
+      clearTimeout(this.writeTimer);
+      this.writeTimer = null;
+    }
+    await this.flushBuffer();
+  }
 }
 
 

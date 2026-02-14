@@ -6,6 +6,7 @@ import { plugins } from "../core";
 import { handleNetworkError, handlePluginError } from "../error";
 import { DB } from "../db";
 import { isBrowser } from "../utils";
+import { PriorityQueue, determineEventPriority } from "./priority";
 
 /**
  * Queue statistics
@@ -41,6 +42,7 @@ export interface QueueConfig {
  */
 export class QueueManager {
   private queue: Payload<EventProperties>[];
+  private priorityQueue: PriorityQueue<EventProperties>;
   private dedupe: EventDedupe;
   private stats: QueueStats;
   private config: QueueConfig | null;
@@ -53,6 +55,7 @@ export class QueueManager {
 
   constructor() {
     this.queue = [];
+    this.priorityQueue = new PriorityQueue();
     this.dedupe = new EventDedupe(QUEUE_CONSTANTS.DEDUPE_CACHE_MAX_SIZE);
     this.stats = {
       totalEvents: 0,
@@ -191,8 +194,11 @@ export class QueueManager {
     this.dedupe.add(event);
     this.stats.totalEvents++;
 
+    const priority = determineEventPriority(event.event);
+    this.priorityQueue.push(event, priority);
+
     if (this.config.debug) {
-      console.log("[Node-Trace] Event pushed:", event.event);
+      console.log("[Node-Trace] Event pushed:", event.event, "priority:", priority);
       console.log("[Node-Trace] Queue length:", this.queue.length);
     }
 
@@ -288,6 +294,7 @@ export class QueueManager {
     }
 
     if (isBrowser()) {
+      await DB.forceFlush();
       await DB.clear();
     }
   }
@@ -349,7 +356,12 @@ export class QueueManager {
     }
 
     const batchSize = this.getDynamicBatchSize();
-    const batch = this.queue.splice(0, batchSize);
+    
+    const priorityBatch = this.priorityQueue.getBatch(batchSize);
+    const batchIds = new Set(priorityBatch.map(e => e.id));
+    
+    const batch = this.queue.filter(e => batchIds.has(e.id));
+    this.queue = this.queue.filter(e => !batchIds.has(e.id));
     this.dedupe.removeBatch(batch);
 
     const processedBatch = this.applyBeforeSendHooks(batch);
@@ -487,6 +499,7 @@ export class QueueManager {
    */
   clear(): void {
     this.queue = [];
+    this.priorityQueue.clear();
     this.dedupe.clear();
   }
 }
