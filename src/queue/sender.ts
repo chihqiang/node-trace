@@ -31,7 +31,10 @@ export interface SendOptions {
  * Send strategy selector
  */
 export class SendStrategySelector {
-  private strategyHistory: Map<SendStrategy, { success: number; total: number }> = new Map();
+  private strategyHistory: Map<
+    SendStrategy,
+    { success: number; total: number }
+  > = new Map();
   private readonly HISTORY_SIZE = 10;
 
   /**
@@ -61,7 +64,10 @@ export class SendStrategySelector {
   /**
    * Select strategy based on historical success rate
    */
-  private selectBasedOnHistory(_bodySize: number, candidates: SendStrategy[]): SendStrategy {
+  private selectBasedOnHistory(
+    _bodySize: number,
+    candidates: SendStrategy[],
+  ): SendStrategy {
     let bestStrategy = candidates[0];
     let bestSuccessRate = 0;
 
@@ -83,7 +89,10 @@ export class SendStrategySelector {
    * Record strategy result
    */
   recordResult(strategy: SendStrategy, success: boolean): void {
-    const history = this.strategyHistory.get(strategy) || { success: 0, total: 0 };
+    const history = this.strategyHistory.get(strategy) || {
+      success: 0,
+      total: 0,
+    };
     history.total++;
     if (success) {
       history.success++;

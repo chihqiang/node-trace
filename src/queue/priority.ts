@@ -2,7 +2,9 @@ import type { Payload, EventProperties } from "../types";
 
 export type EventPriority = "high" | "normal" | "low";
 
-export interface PriorityEvent<T extends EventProperties = EventProperties> extends Payload<T> {
+export interface PriorityEvent<
+  T extends EventProperties = EventProperties,
+> extends Payload<T> {
   priority: EventPriority;
 }
 
@@ -71,7 +73,12 @@ export class PriorityQueue<T extends EventProperties = EventProperties> {
 }
 
 export function determineEventPriority(event: string): EventPriority {
-  const highPriorityEvents = ["js_error", "promise_error", "session_start", "session_end"];
+  const highPriorityEvents = [
+    "js_error",
+    "promise_error",
+    "session_start",
+    "session_end",
+  ];
   const lowPriorityEvents = ["scroll", "page_view", "performance"];
 
   if (highPriorityEvents.includes(event)) {

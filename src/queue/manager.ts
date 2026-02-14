@@ -88,7 +88,10 @@ export class QueueManager {
     if (!this.config) return 0;
 
     const now = Date.now();
-    if (this.cachedPressure !== null && now - this.pressureCacheTime < this.PRESSURE_CACHE_TTL) {
+    if (
+      this.cachedPressure !== null &&
+      now - this.pressureCacheTime < this.PRESSURE_CACHE_TTL
+    ) {
       return this.cachedPressure;
     }
 
@@ -198,7 +201,12 @@ export class QueueManager {
     this.priorityQueue.push(event, priority);
 
     if (this.config.debug) {
-      console.log("[Node-Trace] Event pushed:", event.event, "priority:", priority);
+      console.log(
+        "[Node-Trace] Event pushed:",
+        event.event,
+        "priority:",
+        priority,
+      );
       console.log("[Node-Trace] Queue length:", this.queue.length);
     }
 
@@ -356,12 +364,12 @@ export class QueueManager {
     }
 
     const batchSize = this.getDynamicBatchSize();
-    
+
     const priorityBatch = this.priorityQueue.getBatch(batchSize);
-    const batchIds = new Set(priorityBatch.map(e => e.id));
-    
-    const batch = this.queue.filter(e => batchIds.has(e.id));
-    this.queue = this.queue.filter(e => !batchIds.has(e.id));
+    const batchIds = new Set(priorityBatch.map((e) => e.id));
+
+    const batch = this.queue.filter((e) => batchIds.has(e.id));
+    this.queue = this.queue.filter((e) => !batchIds.has(e.id));
     this.dedupe.removeBatch(batch);
 
     const processedBatch = this.applyBeforeSendHooks(batch);
