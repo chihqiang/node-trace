@@ -270,7 +270,7 @@
     <div class="description">
       <h3><i class="fas fa-info-circle me-2"></i>测试功能说明</h3>
       <ul class="list-unstyled">
-        <li><i class="fas fa-check text-success me-2"></i><strong>基本功能测试</strong>：测试初始化、事件发送、存储信息查看和清除功能</li>
+        <li><i class="fas fa-check text-success me-2"></i><strong>基本功能测试</strong>：测试初始化、事件发送和手动触发发送功能</li>
         <li><i class="fas fa-check text-success me-2"></i><strong>设备 ID 测试</strong>：测试设备 ID 获取功能，确保同一设备生成相同的 ID</li>
         <li><i class="fas fa-check text-success me-2"></i><strong>浏览器数据测试</strong>：测试浏览器数据获取功能，收集设备和浏览器相关信息</li>
         <li><i class="fas fa-check text-success me-2"></i><strong>用户 ID 测试</strong>：测试用户 ID 的设置、获取和清除功能</li>
@@ -297,24 +297,14 @@
     <div class="test-section">
       <h2><i class="fas fa-play-circle me-2"></i>基本功能测试</h2>
       <div class="row g-3">
-        <div class="col-md-3 col-sm-6">
+        <div class="col-md-6">
           <button class="btn btn-success w-100 test-button" onclick="testTrack()" disabled>
             <i class="fas fa-paper-plane me-2"></i>发送测试事件
           </button>
         </div>
-        <div class="col-md-3 col-sm-6">
+        <div class="col-md-6">
           <button class="btn btn-primary w-100 test-button" onclick="testFlush()" disabled>
             <i class="fas fa-sync me-2"></i>手动触发发送
-          </button>
-        </div>
-        <div class="col-md-3 col-sm-6">
-          <button class="btn btn-info w-100 test-button" onclick="checkStorage()" disabled>
-            <i class="fas fa-database me-2"></i>查看存储信息
-          </button>
-        </div>
-        <div class="col-md-3 col-sm-6">
-          <button class="btn btn-danger w-100 test-button" onclick="clearStorage()" disabled>
-            <i class="fas fa-trash me-2"></i>清除本地存储
           </button>
         </div>
       </div>
@@ -499,6 +489,7 @@
     </footer>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/dist/index.global.js"></script>
   <script>
     const resultDiv = document.getElementById('result');
@@ -600,7 +591,12 @@
         initButton.disabled = true;
         initButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>初始化中...';
         
-        nodeTrace.init({
+        const NodeTrace = window.nodeTrace;
+        if (!NodeTrace) {
+          throw new Error('NodeTrace SDK 未加载，请检查 /dist/index.global.js 是否存在');
+        }
+        
+        NodeTrace.init({
           appId: 'test-app',
           appKey: 'test-app-key',
           endpoint: 'https://httpbin.org/post',
@@ -611,14 +607,14 @@
         });
         
         log('加载插件...', 'info');
-        nodeTrace.use(nodeTrace.errorPlugin);
-        nodeTrace.use(nodeTrace.performancePlugin);
-        nodeTrace.use(nodeTrace.sessionPlugin);
-        nodeTrace.use(nodeTrace.behaviorPlugin);
-        nodeTrace.use(nodeTrace.networkPlugin);
-        nodeTrace.use(nodeTrace.browserPlugin);
-        nodeTrace.use(nodeTrace.userPlugin);
-        nodeTrace.use(nodeTrace.pageviewPlugin);
+        NodeTrace.use(NodeTrace.errorPlugin);
+        NodeTrace.use(NodeTrace.performancePlugin);
+        NodeTrace.use(NodeTrace.sessionPlugin);
+        NodeTrace.use(NodeTrace.behaviorPlugin);
+        NodeTrace.use(NodeTrace.networkPlugin);
+        NodeTrace.use(NodeTrace.browserPlugin);
+        NodeTrace.use(NodeTrace.userPlugin);
+        NodeTrace.use(NodeTrace.pageviewPlugin);
         
         log('初始化成功 ✓', 'success');
         log('插件加载完成 ✓', 'success');
@@ -635,15 +631,15 @@
       if (!checkInitialized()) return;
       
       try {
+        const NodeTrace = window.nodeTrace;
         log('发送测试事件...', 'info');
-        nodeTrace.track('test_event', {
+        NodeTrace.track('test_event', {
           test_property: 'test_value',
           test_number: 123,
           test_boolean: true,
           timestamp: new Date().toISOString()
         });
         log('事件发送成功 ✓', 'success');
-        setTimeout(checkStorage, 500);
       } catch (error) {
         log(`事件发送失败: ${error.message}`, 'error');
       }
@@ -653,39 +649,12 @@
       if (!checkInitialized()) return;
       
       try {
+        const NodeTrace = window.nodeTrace;
         log('手动触发事件发送...', 'info');
-        nodeTrace.flush();
+        NodeTrace.flush();
         log('手动触发发送成功 ✓', 'success');
-        setTimeout(checkStorage, 1000);
       } catch (error) {
         log(`手动触发发送失败: ${error.message}`, 'error');
-      }
-    }
-    
-    function checkStorage() {
-      try {
-        log('查看存储信息...', 'info');
-        const queue = localStorage.getItem('node-trace-queue');
-        const offline = localStorage.getItem('node-trace-offline');
-        log(`队列长度: ${queue ? JSON.parse(queue).length : 0}`, 'info');
-        log(`离线事件数: ${offline ? JSON.parse(offline).length : 0}`, 'info');
-      } catch (error) {
-        log(`查看存储信息失败: ${error.message}`, 'error');
-      }
-    }
-    
-    function clearStorage() {
-      if (!checkInitialized()) return;
-      
-      try {
-        log('清除本地存储...', 'info');
-        localStorage.removeItem('node-trace-queue');
-        localStorage.removeItem('node-trace-offline');
-        localStorage.removeItem('node-trace-device-id');
-        localStorage.removeItem('node-trace-user-id');
-        log('本地存储清除成功 ✓', 'success');
-      } catch (error) {
-        log(`清除本地存储失败: ${error.message}`, 'error');
       }
     }
     
@@ -693,8 +662,9 @@
       if (!checkInitialized()) return;
       
       try {
+        const NodeTrace = window.nodeTrace;
         log('获取设备 ID...', 'info');
-        const deviceId = nodeTrace.getDeviceId();
+        const deviceId = NodeTrace.getDeviceId();
         log(`设备 ID: ${deviceId}`, 'info');
         log('设备 ID 获取成功 ✓', 'success');
       } catch (error) {
@@ -706,9 +676,10 @@
       if (!checkInitialized()) return;
       
       try {
+        const NodeTrace = window.nodeTrace;
         log('发送带设备 ID 的事件...', 'info');
-        const deviceId = nodeTrace.getDeviceId();
-        nodeTrace.track('test_event_with_device_id', {
+        const deviceId = NodeTrace.getDeviceId();
+        NodeTrace.track('test_event_with_device_id', {
           device_id: deviceId,
           test_property: 'test_value',
           timestamp: new Date().toISOString()
@@ -724,9 +695,10 @@
       if (!checkInitialized()) return;
       
       try {
+        const NodeTrace = window.nodeTrace;
         log('设置用户 ID...', 'info');
         const customId = 'custom_user_' + Date.now();
-        nodeTrace.setID(customId);
+        NodeTrace.setID(customId);
         log('用户 ID 设置成功 ✓', 'success');
         log(`设置的用户 ID: ${customId}`, 'info');
       } catch (error) {
@@ -738,8 +710,9 @@
       if (!checkInitialized()) return;
       
       try {
+        const NodeTrace = window.nodeTrace;
         log('获取用户 ID...', 'info');
-        const userId = nodeTrace.getID();
+        const userId = NodeTrace.getID();
         log('用户 ID 获取成功 ✓', 'success');
         log(`用户 ID: ${userId}`, 'info');
       } catch (error) {
@@ -751,8 +724,9 @@
       if (!checkInitialized()) return;
       
       try {
+        const NodeTrace = window.nodeTrace;
         log('清除用户 ID...', 'info');
-        nodeTrace.clearID();
+        NodeTrace.clearID();
         log('用户 ID 清除成功 ✓', 'success');
       } catch (error) {
         log(`清除用户 ID 失败: ${error.message}`, 'error');
@@ -763,8 +737,9 @@
       if (!checkInitialized()) return;
       
       try {
+        const NodeTrace = window.nodeTrace;
         log('异步生成稳定的设备 ID...', 'info');
-        nodeTrace.generateStableDeviceIdAsync().then(deviceId => {
+        NodeTrace.generateStableDeviceIdAsync().then(deviceId => {
           log('稳定的设备 ID 生成成功 ✓', 'success');
           log(`生成的设备 ID: ${deviceId}`, 'info');
           log('注意: 此 ID 使用浏览器指纹技术生成，更稳定且难以伪造', 'info');
@@ -780,8 +755,9 @@
       if (!checkInitialized()) return;
       
       try {
+        const NodeTrace = window.nodeTrace;
         log('获取浏览器数据...', 'info');
-        const browserData = nodeTrace.getBrowserData();
+        const browserData = NodeTrace.getBrowserData();
         log('浏览器数据获取成功 ✓', 'success');
         logObject(browserData);
       } catch (error) {
@@ -793,9 +769,10 @@
       if (!checkInitialized()) return;
       
       try {
+        const NodeTrace = window.nodeTrace;
         log('发送带浏览器数据的事件...', 'info');
-        const browserData = nodeTrace.getBrowserData();
-        nodeTrace.track('test_event_with_browser_data', {
+        const browserData = NodeTrace.getBrowserData();
+        NodeTrace.track('test_event_with_browser_data', {
           ...browserData,
           test_property: 'test_value',
           timestamp: new Date().toISOString()
@@ -813,20 +790,40 @@
         log('开始测试网络请求...', 'info');
         
         log('测试 fetch 请求...', 'info');
-        fetch('https://jsonplaceholder.typicode.com/todos/1')
-          .then(response => response.json())
+        const fetchController = new AbortController();
+        const fetchTimeout = setTimeout(() => fetchController.abort(), 10000);
+        
+        fetch('https://jsonplaceholder.typicode.com/todos/1', { 
+          signal: fetchController.signal 
+        })
+          .then(response => {
+            clearTimeout(fetchTimeout);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return response.json();
+          })
           .then(data => {
             log('fetch 请求成功，返回数据:', 'info');
             logObject(data);
           })
           .catch(error => {
-            log(`fetch 请求失败: ${error.message}`, 'error');
+            clearTimeout(fetchTimeout);
+            if (error.name === 'AbortError') {
+              log('fetch 请求超时', 'error');
+            } else {
+              log(`fetch 请求失败: ${error.message}`, 'error');
+            }
           });
         
         log('测试 XMLHttpRequest 请求...', 'info');
         const xhr = new XMLHttpRequest();
+        const xhrTimeout = setTimeout(() => {
+          xhr.abort();
+          log('XMLHttpRequest 请求超时', 'error');
+        }, 10000);
+        
         xhr.open('GET', 'https://jsonplaceholder.typicode.com/todos/2');
         xhr.onload = function() {
+          clearTimeout(xhrTimeout);
           if (xhr.status === 200) {
             log('XMLHttpRequest 请求成功，返回数据:', 'info');
             try {
@@ -840,8 +837,14 @@
           }
         };
         xhr.onerror = function() {
+          clearTimeout(xhrTimeout);
           log('XMLHttpRequest 请求错误', 'error');
         };
+        xhr.ontimeout = function() {
+          clearTimeout(xhrTimeout);
+          log('XMLHttpRequest 请求超时', 'error');
+        };
+        xhr.timeout = 10000;
         xhr.send();
         
         log('网络请求测试完成，请查看控制台输出的 network_request 事件', 'info');
@@ -854,11 +857,31 @@
       if (!checkInitialized()) return;
       
       try {
+        const NodeTrace = window.nodeTrace;
         log('测试性能监控...', 'info');
-        log('性能数据将在页面加载完成后自动收集', 'info');
-        log('请查看控制台输出的 performance 事件', 'info');
+        
+        if (window.performance && window.performance.timing) {
+          const timing = window.performance.timing;
+          const loadTime = timing.loadEventEnd - timing.navigationStart;
+          const domReady = timing.domContentLoadedEventEnd - timing.navigationStart;
+          const ttfb = timing.responseStart - timing.navigationStart;
+          
+          log(`页面加载时间: ${loadTime}ms`, 'info');
+          log(`DOM 准备时间: ${domReady}ms`, 'info');
+          log(`首字节时间: ${ttfb}ms`, 'info');
+        }
+        
+        if (window.performance && window.performance.getEntriesByType) {
+          const paintEntries = window.performance.getEntriesByType('paint');
+          paintEntries.forEach(entry => {
+            log(`${entry.name}: ${entry.startTime.toFixed(2)}ms`, 'info');
+          });
+        }
+        
+        log('性能数据收集完成 ✓', 'success');
+        log('注意: 完整的性能数据将在页面加载完成后自动收集', 'info');
       } catch (error) {
-        log(`测试性能监控失败: ${error.message}`);
+        log(`测试性能监控失败: ${error.message}`, 'error');
       }
     }
     
@@ -890,10 +913,11 @@
       if (!checkInitialized()) return;
       
       try {
+        const NodeTrace = window.nodeTrace;
         log('开始发送多个事件...', 'info');
         
         for (let i = 0; i < 10; i++) {
-          nodeTrace.track(`event_${i}`, {
+          NodeTrace.track(`event_${i}`, {
             count: i,
             timestamp: new Date().toISOString()
           });
@@ -901,7 +925,6 @@
         }
         
         log('多个事件发送完成 ✓');
-        setTimeout(checkStorage, 500);
       } catch (error) {
         log(`发送多个事件失败: ${error.message}`);
       }
@@ -911,8 +934,9 @@
       if (!checkInitialized()) return;
       
       try {
+        const NodeTrace = window.nodeTrace;
         log('获取会话 ID...', 'info');
-        const sessionId = nodeTrace.sessions.getID();
+        const sessionId = NodeTrace.sessions.getID();
         log('会话 ID 获取成功 ✓', 'success');
         log(`会话 ID: ${sessionId}`, 'info');
       } catch (error) {
@@ -924,8 +948,9 @@
       if (!checkInitialized()) return;
       
       try {
+        const NodeTrace = window.nodeTrace;
         log('获取会话上下文...', 'info');
-        const sessionContext = nodeTrace.sessions.getContext();
+        const sessionContext = NodeTrace.sessions.getContext();
         log('会话上下文获取成功 ✓', 'success');
         logObject(sessionContext);
       } catch (error) {
@@ -937,12 +962,13 @@
       if (!checkInitialized()) return;
       
       try {
+        const NodeTrace = window.nodeTrace;
         log('获取会话统计...');
         for (let i = 0; i < 3; i++) {
-          nodeTrace.track(`session_test_event_${i}`, { test: 'value' });
+          NodeTrace.track(`session_test_event_${i}`, { test: 'value' });
         }
-        nodeTrace.track('pageview', { path: '/test' });
-        const sessionContext = nodeTrace.sessions.getContext();
+        NodeTrace.track('pageview', { path: '/test' });
+        const sessionContext = NodeTrace.sessions.getContext();
         log('会话统计获取成功 ✓', 'success');
         log(`页面浏览次数: ${sessionContext?.session_page_views}`, 'info');
         log(`事件次数: ${sessionContext?.session_events}`, 'info');
@@ -957,10 +983,10 @@
       if (!checkInitialized()) return;
       
       try {
+        const NodeTrace = window.nodeTrace;
         log('结束会话...', 'info');
-        nodeTrace.sessions.stop();
+        NodeTrace.sessions.stop();
         log('会话已结束 ✓', 'success');
-        setTimeout(checkStorage, 500);
       } catch (error) {
         log(`结束会话失败: ${error.message}`, 'error');
       }
@@ -970,8 +996,9 @@
       if (!checkInitialized()) return;
       
       try {
+        const NodeTrace = window.nodeTrace;
         log('发送行为事件...', 'info');
-        nodeTrace.behaviors.track('user_click', {
+        NodeTrace.behaviors.track('user_click', {
           element_id: 'test-button',
           element_type: 'button',
           action: 'click',
@@ -987,8 +1014,9 @@
       if (!checkInitialized()) return;
       
       try {
+        const NodeTrace = window.nodeTrace;
         log('发送页面浏览...', 'info');
-        nodeTrace.behaviors.trackView({
+        NodeTrace.behaviors.trackView({
           path: window.location.pathname,
           referrer: document.referrer,
           timestamp: new Date().toISOString()
@@ -1003,11 +1031,12 @@
       if (!checkInitialized()) return;
       
       try {
+        const NodeTrace = window.nodeTrace;
         log('获取行为上下文...', 'info');
         for (let i = 0; i < 5; i++) {
-          nodeTrace.behaviors.track(`behavior_event_${i}`, { test: 'value' });
+          NodeTrace.behaviors.track(`behavior_event_${i}`, { test: 'value' });
         }
-        const behaviorContext = nodeTrace.behaviors.getContext();
+        const behaviorContext = NodeTrace.behaviors.getContext();
         log('行为上下文获取成功 ✓', 'success');
         log(`行为步骤数: ${behaviorContext?.behavior_steps}`, 'info');
         log(`唯一事件数: ${behaviorContext?.behavior_unique_events}`, 'info');
@@ -1023,10 +1052,10 @@
       if (!checkInitialized()) return;
       
       try {
+        const NodeTrace = window.nodeTrace;
         log('清除行为路径...', 'info');
-        nodeTrace.behaviors.clear();
+        NodeTrace.behaviors.clear();
         log('行为路径已清除 ✓', 'success');
-        setTimeout(checkStorage, 500);
       } catch (error) {
         log(`清除行为路径失败: ${error.message}`, 'error');
       }
@@ -1036,8 +1065,9 @@
       if (!checkInitialized()) return;
       
       try {
+        const NodeTrace = window.nodeTrace;
         log('测试插件管理器...', 'info');
-        const plugins = nodeTrace.plugins;
+        const plugins = NodeTrace.plugins;
         if (plugins) {
           log('插件管理器获取成功 ✓', 'success');
           const allPlugins = plugins.getAll();
@@ -1060,6 +1090,7 @@
       if (!checkInitialized()) return;
       
       try {
+        const NodeTrace = window.nodeTrace;
         log('测试自定义插件...', 'info');
         const customPlugin = {
           name: 'custom-test-plugin',
@@ -1075,9 +1106,9 @@
             };
           }
         };
-        nodeTrace.use(customPlugin);
+        NodeTrace.use(customPlugin);
         log('自定义插件注册成功 ✓', 'success');
-        nodeTrace.track('test_with_custom_plugin', { test: 'value' });
+        NodeTrace.track('test_with_custom_plugin', { test: 'value' });
         log('使用自定义插件发送事件成功 ✓', 'success');
       } catch (error) {
         log(`测试自定义插件失败: ${error.message}`, 'error');
@@ -1088,6 +1119,7 @@
       if (!checkInitialized()) return;
       
       try {
+        const NodeTrace = window.nodeTrace;
         log('测试插件上下文...', 'info');
         const contextPlugin = {
           name: 'context-test-plugin',
@@ -1103,7 +1135,7 @@
               log('获取 session 插件失败');
             }
             
-            const sessionId = nodeTrace.sessions.getID();
+            const sessionId = NodeTrace.sessions.getID();
             if (sessionId) {
               log(`成功获取会话 ID: ${sessionId} ✓`);
             } else {
@@ -1127,10 +1159,10 @@
           }
         };
         
-        nodeTrace.use(contextPlugin);
+        NodeTrace.use(contextPlugin);
         log('上下文测试插件注册成功 ✓', 'success');
         
-        nodeTrace.track('test_with_context', { test: 'value' });
+        NodeTrace.track('test_with_context', { test: 'value' });
         log('使用上下文测试插件发送事件成功 ✓', 'success');
       } catch (error) {
         log(`测试插件上下文失败: ${error.message}`, 'error');
@@ -1141,6 +1173,7 @@
       if (!checkInitialized()) return;
       
       try {
+        const NodeTrace = window.nodeTrace;
         log('测试插件依赖...', 'info');
         
         const pluginA = {
@@ -1187,13 +1220,13 @@
           }
         };
         
-        nodeTrace.use(pluginA);
+        NodeTrace.use(pluginA);
         log('插件 A 注册成功 ✓');
         
-        nodeTrace.use(pluginB);
+        NodeTrace.use(pluginB);
         log('插件 B 注册成功 ✓');
         
-        nodeTrace.track('test_with_dependencies', { test: 'value' });
+        NodeTrace.track('test_with_dependencies', { test: 'value' });
         log('使用依赖插件发送事件成功 ✓');
       } catch (error) {
         log(`测试插件依赖失败: ${error.message}`);

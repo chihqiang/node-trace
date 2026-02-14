@@ -1,6 +1,7 @@
 export { init, track, use, plugins } from './core'
 
 export { flush, clearTimers } from './queue'
+export { queueManager } from './queue/manager'
 export { getDeviceId, setID, getID, clearID, generateStableDeviceIdAsync } from './plugins/user'
 export { getBrowserData, type BrowserData, browserUtils, storageUtils } from './plugins/browser'
 export type { Options, EventProperties, Payload, IPlugin } from './types'

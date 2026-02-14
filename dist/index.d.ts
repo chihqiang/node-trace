@@ -358,6 +358,131 @@ declare function flush(): Promise<void>;
 declare function clearTimers(): void;
 
 /**
+ * Queue statistics
+ */
+interface QueueStats {
+    totalEvents: number;
+    sendSuccessCount: number;
+    sendFailCount: number;
+    averageSendTime: number;
+    lastSendTime: number;
+}
+/**
+ * Queue configuration
+ */
+interface QueueConfig {
+    maxQueueSize: number;
+    batchSize: number;
+    batchInterval: number;
+    retryCount: number;
+    retryInterval: number;
+    offlineEnabled: boolean;
+    debug: boolean;
+    endpoint: string;
+    appId: string;
+    appKey?: string;
+    headers?: Record<string, string>;
+    timeout?: number;
+}
+/**
+ * Queue manager
+ */
+declare class QueueManager {
+    private queue;
+    private priorityQueue;
+    private dedupe;
+    private stats;
+    private config;
+    private timer;
+    private retryTimers;
+    private offlineCheckTimer;
+    private cachedPressure;
+    private pressureCacheTime;
+    private readonly PRESSURE_CACHE_TTL;
+    constructor();
+    /**
+     * Initialize queue
+     */
+    init(config: QueueConfig): void;
+    /**
+     * Calculate queue pressure (0-1)
+     */
+    private calculatePressure;
+    /**
+     * Get dynamic batch size
+     */
+    private getDynamicBatchSize;
+    /**
+     * Get dynamic send interval
+     */
+    private getDynamicInterval;
+    /**
+     * Handle queue full scenario
+     */
+    private handleQueueFull;
+    /**
+     * Push event to queue
+     */
+    push<T extends EventProperties>(event: Payload<T>): void;
+    /**
+     * Schedule send task
+     */
+    private schedule;
+    /**
+     * Update send statistics
+     */
+    private updateStats;
+    /**
+     * Handle send failure
+     */
+    private handleSendFailure;
+    /**
+     * Handle send success
+     */
+    private handleSendSuccess;
+    /**
+     * Apply plugin beforeSend hooks
+     */
+    private applyBeforeSendHooks;
+    /**
+     * Apply plugin afterSend hooks
+     */
+    private applyAfterSendHooks;
+    /**
+     * Send events in queue
+     */
+    flush(): Promise<void>;
+    /**
+     * Start offline event check
+     */
+    private startOfflineCheck;
+    /**
+     * Restore offline events
+     */
+    restoreOfflineEvents(): Promise<void>;
+    /**
+     * Clear all timers
+     */
+    clearTimers(): void;
+    /**
+     * Get queue statistics
+     */
+    getStats(): QueueStats;
+    /**
+     * Get queue length
+     */
+    length(): number;
+    /**
+     * Clear queue
+     */
+    clear(): void;
+}
+/**
+ * Queue manager instance
+ */
+declare const queueManager: QueueManager;
+
+/**
  * User management plugin
  * Responsible for device ID and user ID generation, storage, and management
  */
@@ -1292,4 +1417,4 @@ declare function handleDataError(error: unknown, context?: Record<string, unknow
  */
 declare function handleUnknownError(error: unknown, context?: Record<string, unknown>): void;
 
-export { type BrowserData, ErrorHandler, type ErrorHandlerConfig, type ErrorLevel, type ErrorStats, type ErrorSummary, type ErrorType, type EventProperties, type IPlugin, type Options, type Payload, type TraceError, behaviorPlugin, behaviors, browserPlugin, browserUtils, calculateErrorRate, captureError, cleanupTimestamps, clearID, clearTimers, errorHandler, errorPlugin, flush, generateErrorSummary, generateStableDeviceIdAsync, getBrowserData, getDeviceId, getID, handleBehaviorError, handleBrowserError, handleDataError, handleDeviceError, handleNetworkError, handlePluginError, handleQueueError, handleSessionError, handleStorageError, handleUnknownError, init, initializeStats, networkPlugin, pageviewPlugin, performancePlugin, plugins, sessionPlugin, sessions, setID, storageUtils, track, use, userPlugin };
+export { type BrowserData, ErrorHandler, type ErrorHandlerConfig, type ErrorLevel, type ErrorStats, type ErrorSummary, type ErrorType, type EventProperties, type IPlugin, type Options, type Payload, type TraceError, behaviorPlugin, behaviors, browserPlugin, browserUtils, calculateErrorRate, captureError, cleanupTimestamps, clearID, clearTimers, errorHandler, errorPlugin, flush, generateErrorSummary, generateStableDeviceIdAsync, getBrowserData, getDeviceId, getID, handleBehaviorError, handleBrowserError, handleDataError, handleDeviceError, handleNetworkError, handlePluginError, handleQueueError, handleSessionError, handleStorageError, handleUnknownError, init, initializeStats, networkPlugin, pageviewPlugin, performancePlugin, plugins, queueManager, sessionPlugin, sessions, setID, storageUtils, track, use, userPlugin };
